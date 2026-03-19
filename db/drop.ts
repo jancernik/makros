@@ -1,6 +1,7 @@
 import "dotenv/config"
 import { Client } from "pg"
 import readline from "readline"
+
 import { dbEnv } from "./env"
 
 function askConfirmation(question: string): Promise<boolean> {
@@ -24,11 +25,11 @@ async function dropDatabase() {
   }
 
   const adminClient = new Client({
-    user: dbEnv.user,
+    database: "postgres",
     host: dbEnv.host,
-    port: dbEnv.port,
     password: dbEnv.password,
-    database: "postgres"
+    port: dbEnv.port,
+    user: dbEnv.user
   })
   await adminClient.connect()
 

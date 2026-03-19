@@ -5,10 +5,10 @@ for (const key of required) {
 }
 
 export const dbEnv = {
-  user: process.env.DB_USER!,
   host: process.env.DB_HOST!,
-  port: Number(process.env.DB_PORT!),
   name: process.env.DB_NAME!,
   password: process.env.DB_PASSWORD!,
-  url: `postgres://${process.env.DB_USER}:${process.env.DB_PASSWORD}@${process.env.DB_HOST}:${process.env.DB_PORT}/${process.env.DB_NAME}`
+  port: Number(process.env.DB_PORT!),
+  url: `postgres://${process.env.DB_USER}:${process.env.DB_PASSWORD}@${process.env.DB_HOST}:${process.env.DB_PORT}/${process.env.DB_NAME}`,
+  user: process.env.DB_USER!
 }

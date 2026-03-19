@@ -2,15 +2,16 @@ import "dotenv/config"
 import { drizzle } from "drizzle-orm/node-postgres"
 import { migrate } from "drizzle-orm/node-postgres/migrator"
 import { Client } from "pg"
+
 import { dbEnv } from "./env"
 
 async function migrateDb() {
   const client = new Client({
-    user: dbEnv.user,
+    database: dbEnv.name,
     host: dbEnv.host,
-    port: dbEnv.port,
     password: dbEnv.password,
-    database: dbEnv.name
+    port: dbEnv.port,
+    user: dbEnv.user
   })
 
   try {

@@ -1,14 +1,15 @@
 import "dotenv/config"
 import { Client } from "pg"
+
 import { dbEnv } from "./env"
 
 async function createDatabase() {
   const adminClient = new Client({
-    user: dbEnv.user,
+    database: "postgres",
     host: dbEnv.host,
-    port: dbEnv.port,
     password: dbEnv.password,
-    database: "postgres"
+    port: dbEnv.port,
+    user: dbEnv.user
   })
   await adminClient.connect()
 

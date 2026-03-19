@@ -1,5 +1,6 @@
 import "dotenv/config"
 import { defineConfig } from "drizzle-kit"
+
 import { dbEnv } from "./db/env"
 
 export default defineConfig({
