@@ -15,13 +15,17 @@ function askConfirmation(question: string): Promise<boolean> {
 }
 
 async function dropDatabase() {
-  const confirmed = await askConfirmation(
-    `Are you sure you want to drop the database "${dbEnv.name}"? (y/N): `
-  )
+  const force = process.argv.includes("--force") || process.argv.includes("-y")
 
-  if (!confirmed) {
-    console.log("✓ Database drop cancelled.")
-    return
+  if (!force) {
+    const confirmed = await askConfirmation(
+      `Are you sure you want to drop the database "${dbEnv.name}"? (y/N): `
+    )
+
+    if (!confirmed) {
+      console.log("✓ Database drop cancelled.")
+      return
+    }
   }
 
   const adminClient = new Client({
