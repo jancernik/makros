@@ -55,6 +55,7 @@ export const dayPlans = pgTable(
   {
     id: uuid("id").defaultRandom().primaryKey(),
     date: date("date", { mode: "string" }).notNull(),
+    note: text("note"),
     createdAt: timestamp("created_at", { mode: "date", withTimezone: true }).defaultNow().notNull(),
     updatedAt: timestamp("updated_at", { mode: "date", withTimezone: true }).defaultNow().notNull()
   },

@@ -1,0 +1,526 @@
+{
+  "id": "f0837d83-323a-4f86-8a33-e33e3c07e0bd",
+  "prevId": "ec7a6778-bdac-45df-a408-9589dd20632e",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.daily_targets": {
+      "name": "daily_targets",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "day_plan_id": {
+          "name": "day_plan_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "calories": {
+          "name": "calories",
+          "type": "numeric(10, 2)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "protein": {
+          "name": "protein",
+          "type": "numeric(10, 2)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "carbohydrates": {
+          "name": "carbohydrates",
+          "type": "numeric(10, 2)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "fat": {
+          "name": "fat",
+          "type": "numeric(10, 2)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "daily_targets_day_plan_id_day_plans_id_fk": {
+          "name": "daily_targets_day_plan_id_day_plans_id_fk",
+          "tableFrom": "daily_targets",
+          "tableTo": "day_plans",
+          "columnsFrom": [
+            "day_plan_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "daily_targets_day_plan_id_unique": {
+          "name": "daily_targets_day_plan_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "day_plan_id"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {
+        "daily_targets_calories_nonnegative": {
+          "name": "daily_targets_calories_nonnegative",
+          "value": "\"daily_targets\".\"calories\" >= 0"
+        },
+        "daily_targets_protein_nonnegative": {
+          "name": "daily_targets_protein_nonnegative",
+          "value": "\"daily_targets\".\"protein\" >= 0"
+        },
+        "daily_targets_carbohydrates_nonnegative": {
+          "name": "daily_targets_carbohydrates_nonnegative",
+          "value": "\"daily_targets\".\"carbohydrates\" >= 0"
+        },
+        "daily_targets_fat_nonnegative": {
+          "name": "daily_targets_fat_nonnegative",
+          "value": "\"daily_targets\".\"fat\" >= 0"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.day_plan_items": {
+      "name": "day_plan_items",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "day_plan_id": {
+          "name": "day_plan_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "food_id": {
+          "name": "food_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "amount": {
+          "name": "amount",
+          "type": "numeric(10, 2)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "consumed_amount": {
+          "name": "consumed_amount",
+          "type": "numeric(10, 2)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "position": {
+          "name": "position",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "day_plan_items_day_plan_id_idx": {
+          "name": "day_plan_items_day_plan_id_idx",
+          "columns": [
+            {
+              "expression": "day_plan_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "day_plan_items_food_id_idx": {
+          "name": "day_plan_items_food_id_idx",
+          "columns": [
+            {
+              "expression": "food_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "day_plan_items_position_idx": {
+          "name": "day_plan_items_position_idx",
+          "columns": [
+            {
+              "expression": "position",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "day_plan_items_day_plan_id_day_plans_id_fk": {
+          "name": "day_plan_items_day_plan_id_day_plans_id_fk",
+          "tableFrom": "day_plan_items",
+          "tableTo": "day_plans",
+          "columnsFrom": [
+            "day_plan_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "day_plan_items_food_id_foods_id_fk": {
+          "name": "day_plan_items_food_id_foods_id_fk",
+          "tableFrom": "day_plan_items",
+          "tableTo": "foods",
+          "columnsFrom": [
+            "food_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "day_plan_items_amount_positive": {
+          "name": "day_plan_items_amount_positive",
+          "value": "\"day_plan_items\".\"amount\" > 0"
+        },
+        "day_plan_items_consumed_amount_nonnegative": {
+          "name": "day_plan_items_consumed_amount_nonnegative",
+          "value": "\"day_plan_items\".\"consumed_amount\" >= 0"
+        },
+        "day_plan_items_consumed_amount_lte_amount": {
+          "name": "day_plan_items_consumed_amount_lte_amount",
+          "value": "\"day_plan_items\".\"consumed_amount\" <= \"day_plan_items\".\"amount\""
+        },
+        "day_plan_items_position_nonnegative": {
+          "name": "day_plan_items_position_nonnegative",
+          "value": "\"day_plan_items\".\"position\" >= 0"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.day_plans": {
+      "name": "day_plans",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "date": {
+          "name": "date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "note": {
+          "name": "note",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "day_plans_date_unique": {
+          "name": "day_plans_date_unique",
+          "columns": [
+            {
+              "expression": "date",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.foods": {
+      "name": "foods",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "unit": {
+          "name": "unit",
+          "type": "food_unit",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "base_amount": {
+          "name": "base_amount",
+          "type": "numeric(10, 2)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "calories": {
+          "name": "calories",
+          "type": "numeric(10, 2)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "protein": {
+          "name": "protein",
+          "type": "numeric(10, 2)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "carbohydrates": {
+          "name": "carbohydrates",
+          "type": "numeric(10, 2)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "fat": {
+          "name": "fat",
+          "type": "numeric(10, 2)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "notes": {
+          "name": "notes",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "hidden": {
+          "name": "hidden",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "position": {
+          "name": "position",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "foods_name_unique": {
+          "name": "foods_name_unique",
+          "columns": [
+            {
+              "expression": "name",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "foods_name_idx": {
+          "name": "foods_name_idx",
+          "columns": [
+            {
+              "expression": "name",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "foods_position_idx": {
+          "name": "foods_position_idx",
+          "columns": [
+            {
+              "expression": "position",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "foods_base_amount_positive": {
+          "name": "foods_base_amount_positive",
+          "value": "\"foods\".\"base_amount\" > 0"
+        },
+        "foods_calories_nonnegative": {
+          "name": "foods_calories_nonnegative",
+          "value": "\"foods\".\"calories\" >= 0"
+        },
+        "foods_protein_nonnegative": {
+          "name": "foods_protein_nonnegative",
+          "value": "\"foods\".\"protein\" >= 0"
+        },
+        "foods_carbohydrates_nonnegative": {
+          "name": "foods_carbohydrates_nonnegative",
+          "value": "\"foods\".\"carbohydrates\" >= 0"
+        },
+        "foods_fat_nonnegative": {
+          "name": "foods_fat_nonnegative",
+          "value": "\"foods\".\"fat\" >= 0"
+        },
+        "foods_position_nonnegative": {
+          "name": "foods_position_nonnegative",
+          "value": "\"foods\".\"position\" >= 0"
+        }
+      },
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {
+    "public.food_unit": {
+      "name": "food_unit",
+      "schema": "public",
+      "values": [
+        "g",
+        "ml",
+        "unit"
+      ]
+    }
+  },
+  "schemas": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}
