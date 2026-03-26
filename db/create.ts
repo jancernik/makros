@@ -9,6 +9,7 @@ async function createDatabase() {
     host: dbEnv.host,
     password: dbEnv.password,
     port: dbEnv.port,
+    ssl: dbEnv.ssl,
     user: dbEnv.user
   })
   await adminClient.connect()

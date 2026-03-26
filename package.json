@@ -11,6 +11,8 @@
     "format": "prettier --write .",
     "db:create": "tsx db/create.ts",
     "db:migrate": "tsx db/migrate.ts",
+    "db:seed": "tsx db/seed/index.ts",
+    "db:reset": "tsx db/reset.ts",
     "db:drop": "tsx db/drop.ts",
     "db:studio": "tsx db/studio.ts",
     "db:generate": "drizzle-kit generate"
