@@ -1,10 +1,10 @@
-import type { ComponentPropsWithRef } from "react"
+import type { ComponentProps } from "react"
 
 import Link from "next/link"
 
-type ButtonLinkProps = ComponentPropsWithRef<typeof Link> & VisualProps
+type ButtonLinkProps = ComponentProps<typeof Link> & VisualProps
 
-type ButtonProps = ComponentPropsWithRef<"button"> & VisualProps
+type ButtonProps = ComponentProps<"button"> & VisualProps
 type Size = "lg" | "md" | "sm"
 
 type Variant = "danger" | "ghost" | "primary" | "secondary"
@@ -15,7 +15,7 @@ type VisualProps = {
 }
 
 const baseClasses =
-  "inline-flex items-center justify-center gap-1.5 border border-[#2a2a2a] text-(--text) cursor-pointer font-[inherit] tracking-[0.01em] transition-[background-color,border-color] duration-100 whitespace-nowrap disabled:opacity-[0.35] disabled:cursor-not-allowed"
+  "inline-flex items-center justify-center gap-2 border border-[#2a2a2a] text-(--text) cursor-pointer font-[inherit] tracking-[0.01em] transition-[background-color,border-color] duration-100 whitespace-nowrap disabled:opacity-[0.35] disabled:cursor-not-allowed"
 
 const sizeClasses: Record<Size, string> = {
   lg: "h-11 px-5 text-[15px]",
