@@ -1,5 +1,7 @@
 import type { Metadata } from "next"
 
+import { SpeedInsights } from "@vercel/speed-insights/next"
+
 import "./globals.css"
 import { TimezoneSync } from "./components/timezone-sync"
 
@@ -16,8 +18,9 @@ export default function RootLayout({
   return (
     <html className="bg-black" lang="en">
       <body className="bg-black text-[#ededed]">
-        <TimezoneSync />
         {children}
+        <TimezoneSync />
+        <SpeedInsights />
       </body>
     </html>
   )
