@@ -1,4 +1,4 @@
-import type { ComponentProps } from "react"
+import type { ComponentProps, CSSProperties, ReactNode } from "react"
 
 export type InputFieldProps = BaseInputProps &
   CommonProps & {
@@ -8,19 +8,23 @@ export type InputFieldProps = BaseInputProps &
 
 export type InputProps = InputFieldProps | TextareaFieldProps
 
+type AdornmentProps =
+  | { icon: ReactNode; iconPosition: "left"; unit: string; unitPosition: "right" }
+  | { icon: ReactNode; iconPosition: "right"; unit: string; unitPosition: "left" }
+  | { icon: ReactNode; iconPosition?: "left" | "right"; unit?: never; unitPosition?: never }
+  | { icon?: never; iconPosition?: never; unit?: string; unitPosition?: "left" | "right" }
+
 type BaseInputProps = Omit<ComponentProps<"input">, "size" | "type"> & {
   type?: InputType
 }
 
-type CommonProps = {
+type CommonProps = AdornmentProps & {
   className?: string
   description?: string
   error?: string
   label?: string
   size?: "lg" | "md" | "sm"
   textAlign?: "center" | "left" | "right"
-  unit?: string
-  unitPosition?: "left" | "right"
 }
 
 type InputType = "date" | "email" | "number" | "password" | "search" | "tel" | "text" | "url"
@@ -35,6 +39,8 @@ const omitCommon = <T extends InputProps>({
   className: _className,
   description: _description,
   error: _error,
+  icon: _icon,
+  iconPosition: _iconPosition,
   label: _label,
   multiline: _multiline,
   rows: _rows,
@@ -50,6 +56,8 @@ export function Input(props: InputProps) {
     className,
     description,
     error,
+    icon,
+    iconPosition = "right",
     label,
     size = "md",
     textAlign = "left",
@@ -58,12 +66,24 @@ export function Input(props: InputProps) {
   } = props
 
   const id = props.id
+
+  if (process.env.NODE_ENV !== "production" && icon && unit && iconPosition === unitPosition) {
+    console.warn(`Input: icon and unit are both on the "${iconPosition}" side — they will overlap.`)
+  }
+
   const unitPositionClass = unitPosition === "left" ? "left-[0.6rem]" : "right-[0.6rem]"
-  const unitStyle = unit
-    ? unitPosition === "left"
-      ? { paddingLeft: `calc(${unit.length}ch + 0.9rem)` }
-      : { paddingRight: `calc(${unit.length}ch + 0.9rem)` }
-    : undefined
+
+  const paddingStyle: CSSProperties = {}
+  if (unit) {
+    const unitPad = `calc(${unit.length}ch + 0.9rem)`
+    if (unitPosition === "left") paddingStyle.paddingLeft = unitPad
+    else paddingStyle.paddingRight = unitPad
+  }
+  if (icon) {
+    if (iconPosition === "left") paddingStyle.paddingLeft = "1.875rem"
+    else paddingStyle.paddingRight = "1.875rem"
+  }
+  const unitStyle = Object.keys(paddingStyle).length ? paddingStyle : undefined
   const errorBorder = error ? "border-red-900! focus:border-red-700!" : "focus:border-[#555]"
 
   const textAlignClass =
@@ -100,9 +120,17 @@ export function Input(props: InputProps) {
 
         {unit && (
           <span
-            className={`pointer-events-none absolute ${unitPositionClass} top-1/2 -translate-y-1/2 select-none font-mono text-sm text-[#555]`}
+            className={`pointer-events-none absolute ${unitPositionClass} top-1/2 -translate-y-1/2 select-none text-sm text-[#555]`}
           >
             {unit}
+          </span>
+        )}
+
+        {icon && (
+          <span
+            className={`pointer-events-none absolute ${iconPosition === "left" ? "left-2" : "right-2"} top-1/2 -translate-y-1/2 text-[#555]`}
+          >
+            {icon}
           </span>
         )}
       </div>
