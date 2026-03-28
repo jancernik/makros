@@ -1,7 +1,7 @@
 "use client"
 
 import { useRouter } from "next/navigation"
-import { createContext, useContext, useTransition } from "react"
+import { createContext, ReactNode, useContext, useTransition } from "react"
 
 type NavContextValue = {
   isPending: boolean
@@ -10,7 +10,7 @@ type NavContextValue = {
 
 const NavContext = createContext<NavContextValue>({ isPending: false, navigate: () => {} })
 
-export function NavProvider({ children }: { children: React.ReactNode }) {
+export function NavProvider({ children }: { children: ReactNode }) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
 

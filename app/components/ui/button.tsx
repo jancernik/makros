@@ -15,12 +15,12 @@ type VisualProps = {
 }
 
 const baseClasses =
-  "inline-flex items-center justify-center gap-2 border border-[#2a2a2a] text-(--text) cursor-pointer font-[inherit] tracking-[0.01em] transition-[background-color,border-color] duration-100 whitespace-nowrap disabled:opacity-[0.35] disabled:cursor-not-allowed"
+  "inline-flex items-center justify-center gap-2 border border-[#2a2a2a] text-(--text) cursor-pointer font-[inherit] transition-[background-color,border-color] duration-100 whitespace-nowrap disabled:opacity-[0.35] disabled:cursor-not-allowed"
 
 const sizeClasses: Record<Size, string> = {
   lg: "h-11 px-5 text-[15px]",
   md: "h-9 px-3.5 text-[14px]",
-  sm: "h-7 px-2.5 text-[13px]"
+  sm: "h-7 px-2.5 text-[11px]"
 }
 
 const iconOnlySizeClasses: Record<Size, string> = {

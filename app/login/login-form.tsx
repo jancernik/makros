@@ -3,8 +3,8 @@
 import { useActionState, useState } from "react"
 
 import { login, type LoginActionState } from "../auth/actions"
-import { Button } from "../components/button"
-import { Input } from "../components/input"
+import { Button } from "../components/ui/button"
+import { Input } from "../components/ui/input"
 
 const initialState: LoginActionState = {
   errors: {},

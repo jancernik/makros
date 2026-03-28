@@ -7,6 +7,18 @@ const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
   perfectionist.configs["recommended-natural"],
+  {
+    rules: {
+      "@typescript-eslint/no-unused-vars": [
+        "error",
+        {
+          argsIgnorePattern: "^_",
+          varsIgnorePattern: "^_"
+        }
+      ],
+      "react-hooks/incompatible-library": "off"
+    }
+  },
   // Override default ignores of eslint-config-next.
   globalIgnores([
     // Default ignores of eslint-config-next:

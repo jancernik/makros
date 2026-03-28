@@ -66,6 +66,13 @@ export function isAuthEnabled() {
   return getAuthConfig().enabled
 }
 
+export async function requireAuth() {
+  const session = await getSessionFromCookies()
+  if (session.authEnabled && !session.authenticated) {
+    throw new Error("Unauthorized")
+  }
+}
+
 export async function setSessionCookie(token: string) {
   const cookieStore = await cookies()
 
