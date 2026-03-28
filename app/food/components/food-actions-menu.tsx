@@ -63,7 +63,7 @@ export function FoodActionsMenu({ foodId, isHidden }: Props) {
   }
 
   return (
-    <div className="food-actions-trigger relative">
+    <div className="food-actions-trigger relative mr-1">
       <Float>
         <FloatTrigger>
           <Button
