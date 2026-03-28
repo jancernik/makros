@@ -1,6 +1,10 @@
+import { LogOut, PlusCircle, Ruler, SquarePen } from "lucide-react"
 import { cookies } from "next/headers"
 
+import { logout } from "../auth/actions"
+import { isAuthEnabled } from "../auth/lib"
 import { NavProvider } from "../components/nav-provider"
+import { Button, ButtonLink } from "../components/ui/button"
 import { DatePicker } from "./components/date-picker"
 import { PLAN_TABLE_DEFAULT_ORDER } from "./components/day-plan-table"
 import { FoodPanels } from "./components/food-panels"
@@ -30,6 +34,7 @@ export default async function FoodPage({ searchParams }: Props) {
   )
   const panelsLayout = parsePanelsLayoutCookie(cookieStore.get("panels-layout")?.value)
 
+  const authEnabled = isAuthEnabled()
   const [allFoods, plan] = await Promise.all([
     getFoods({ includeHidden: true }),
     getDayPlanByDate(selectedDate)
@@ -46,6 +51,26 @@ export default async function FoodPage({ searchParams }: Props) {
           <div className="flex items-center gap-4">
             <h1>Makros</h1>
             <DatePicker date={selectedDate} today={today} />
+          </div>
+
+          <div className="flex items-center gap-3">
+            <ButtonLink className="ml-3" href={`/food/targets?date=${selectedDate}`}>
+              <Ruler size={15} /> Targets
+            </ButtonLink>
+            <ButtonLink href={`/food/note?date=${selectedDate}`}>
+              <SquarePen size={15} /> Note
+            </ButtonLink>
+            <ButtonLink href="/food/new">
+              <PlusCircle size={15} />
+              New food
+            </ButtonLink>
+            {authEnabled ? (
+              <form action={logout}>
+                <Button type="submit" variant="danger">
+                  <LogOut size={15} /> Logout
+                </Button>
+              </form>
+            ) : null}
           </div>
         </header>
 
