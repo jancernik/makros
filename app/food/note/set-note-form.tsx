@@ -1,6 +1,6 @@
 "use client"
 
-import { useRouter } from "next/navigation"
+import { useRouter } from "nextjs-toploader/app"
 import { useActionState, useEffect } from "react"
 
 import { SubmitButton } from "../../components/submit-button"

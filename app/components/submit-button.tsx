@@ -1,5 +1,6 @@
 "use client"
 
+import { Loader2 } from "lucide-react"
 import { ComponentProps } from "react"
 import { useFormStatus } from "react-dom"
 
@@ -14,7 +15,14 @@ export function SubmitButton({ children, pendingLabel, variant = "primary", ...r
 
   return (
     <Button disabled={pending} variant={variant} {...rest}>
-      {pending ? (pendingLabel ?? children) : children}
+      {pending ? (
+        <>
+          <Loader2 className="animate-spin" size={14} />
+          {pendingLabel ?? children}
+        </>
+      ) : (
+        children
+      )}
     </Button>
   )
 }

@@ -1,6 +1,6 @@
 "use client"
 
-import { useRouter } from "next/navigation"
+import { useRouter } from "nextjs-toploader/app"
 import { useActionState, useEffect, useState } from "react"
 
 import type { Food } from "@/db/schema"
@@ -60,7 +60,7 @@ export function FoodForm({ food }: Props) {
           min="0"
           name="baseAmount"
           placeholder={food ? undefined : unit === "unit" ? "1" : "100"}
-          step={unit === "unit" ? 1 : 10}
+          step="1"
           type="number"
           unit={unit !== "unit" ? unit : undefined}
         />
@@ -83,7 +83,7 @@ export function FoodForm({ food }: Props) {
           min="0"
           name="calories"
           placeholder={food ? undefined : "130"}
-          step="1"
+          step="0.01"
           type="number"
           unit="kcal"
         />
@@ -96,7 +96,7 @@ export function FoodForm({ food }: Props) {
           min="0"
           name="protein"
           placeholder={food ? undefined : "2.7"}
-          step="1"
+          step="0.01"
           type="number"
           unit="g"
         />
@@ -109,7 +109,7 @@ export function FoodForm({ food }: Props) {
           min="0"
           name="carbohydrates"
           placeholder={food ? undefined : "28"}
-          step="1"
+          step="0.01"
           type="number"
           unit="g"
         />
@@ -122,7 +122,7 @@ export function FoodForm({ food }: Props) {
           min="0"
           name="fat"
           placeholder={food ? undefined : "0.3"}
-          step="1"
+          step="0.01"
           type="number"
           unit="g"
         />
