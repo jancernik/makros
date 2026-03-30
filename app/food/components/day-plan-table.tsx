@@ -23,17 +23,16 @@ import {
   type SortingState,
   useReactTable
 } from "@tanstack/react-table"
-import { Eye, EyeOff, X } from "lucide-react"
+import { CircleCheck, Eye, EyeOff, SearchX, UtensilsCrossed, X } from "lucide-react"
 import { useEffect, useMemo, useRef, useState } from "react"
 
 import type { DailyTarget } from "@/db/schema"
 
-import type { getDayPlanByDate } from "../queries"
-
-import { SubmitButton } from "../../components/submit-button"
+import { Button } from "../../components/ui/button"
 import { Toggle } from "../../components/ui/toggle"
 import { removePlanItem, reorderPlanItems } from "../actions"
 import { PlanAmountInputs } from "./plan-amount-inputs"
+import { type PlanItem, usePlan } from "./plan-provider"
 import {
   applyTableSortingChange,
   DraggableHeader,
@@ -46,8 +45,6 @@ import {
   TableToolbar,
   useTableDnd
 } from "./table-utils"
-
-type PlanItem = NonNullable<Awaited<ReturnType<typeof getDayPlanByDate>>>["items"][number]
 
 function getPlanItemNumericVal(item: PlanItem, columnId: string): number {
   const ratio = item.food.baseAmount > 0 ? item.amount / item.food.baseAmount : 0
@@ -87,7 +84,6 @@ type Props = {
   initialShowConsumed?: boolean
   initialSorting?: SortingState
   initialVisibility?: Record<string, boolean>
-  plan: Awaited<ReturnType<typeof getDayPlanByDate>>
   target: DailyTarget | undefined
 }
 
@@ -96,10 +92,26 @@ export function DayPlanTable({
   initialShowConsumed = true,
   initialSorting = [],
   initialVisibility = {},
-  plan,
   target
 }: Props) {
-  const items = useMemo(() => plan?.items ?? [], [plan])
+  const { amounts, baseItems, pendingItems, removedIds, trackSave } = usePlan()
+
+  const items = useMemo(
+    () => [
+      ...baseItems
+        .filter((i) => !removedIds.has(i.id))
+        .map((i) => {
+          const o = amounts[i.id]
+          return o ? { ...i, amount: o.amount, consumedAmount: o.consumedAmount } : i
+        }),
+      ...pendingItems.map((i) => {
+        const o = amounts[i.id]
+        return o ? { ...i, amount: o.amount, consumedAmount: o.consumedAmount } : i
+      })
+    ],
+    [baseItems, amounts, removedIds, pendingItems]
+  )
+
   const [globalFilter, setGlobalFilter] = useState("")
   const [sorting, setSorting] = useState<SortingState>(initialSorting)
   const [columnVisibility, setColumnVisibility] =
@@ -109,13 +121,39 @@ export function DayPlanTable({
   )
 
   const [showConsumed, setShowConsumed] = useState(initialShowConsumed)
-  const [rowOrder, setRowOrder] = useState<string[]>(() => items.map((i) => i.id))
-  const [prevItems, setPrevItems] = useState(items)
+
+  const [rowOrder, setRowOrder] = useState<string[]>(() => [
+    ...baseItems.map((i) => i.id),
+    ...pendingItems.map((i) => i.id)
+  ])
+  const [prevBaseItems, setPrevBaseItems] = useState(baseItems)
+  const [prevPendingItems, setPrevPendingItems] = useState(pendingItems)
   const activeTypeRef = useRef<"column" | "row" | null>(null)
 
-  if (items !== prevItems) {
-    setPrevItems(items)
-    setRowOrder(items.map((i) => i.id))
+  if (baseItems !== prevBaseItems || pendingItems !== prevPendingItems) {
+    setPrevBaseItems(baseItems)
+    setPrevPendingItems(pendingItems)
+
+    const allCurrent = [...baseItems, ...pendingItems]
+    const currentIdSet = new Set(allCurrent.map((i) => i.id))
+
+    const promotionMap = new Map<string, string>()
+    for (let idx = 0; idx < Math.min(prevPendingItems.length, pendingItems.length); idx++) {
+      const prev = prevPendingItems[idx]
+      const cur = pendingItems[idx]
+      if (prev.foodId === cur.foodId && prev.id !== cur.id) {
+        promotionMap.set(prev.id, cur.id)
+      }
+    }
+
+    setRowOrder((prev) => {
+      const mapped = prev
+        .map((id) => promotionMap.get(id) ?? id)
+        .filter((id) => currentIdSet.has(id))
+      const mappedSet = new Set(mapped)
+      const added = allCurrent.filter((i) => !mappedSet.has(i.id)).map((i) => i.id)
+      return [...mapped, ...added]
+    })
   }
 
   useEffect(() => {
@@ -130,7 +168,12 @@ export function DayPlanTable({
     if (sorting.length > 0)
       return sortTableRows(visible, sorting, (i) => i.food.name, getPlanItemNumericVal)
     const itemMap = new Map(visible.map((i) => [i.id, i]))
-    return rowOrder.map((id) => itemMap.get(id)).filter((i): i is PlanItem => i !== undefined)
+    const rowOrderSet = new Set(rowOrder)
+    const ordered = rowOrder
+      .map((id) => itemMap.get(id))
+      .filter((i): i is PlanItem => i !== undefined)
+    const unordered = visible.filter((i) => !rowOrderSet.has(i.id))
+    return [...ordered, ...unordered]
   }, [items, sorting, rowOrder, showConsumed])
 
   const columns = useMemo<ColumnDef<PlanItem>[]>(
@@ -143,13 +186,7 @@ export function DayPlanTable({
         id: "handle"
       },
       {
-        cell: ({ row }) => (
-          <form action={removePlanItem.bind(null, row.original.id)}>
-            <SubmitButton iconOnly variant="secondary">
-              <X className="text-red-400" size={14} />
-            </SubmitButton>
-          </form>
-        ),
+        cell: ({ row }) => <DeleteButton itemId={row.original.id} />,
         enableHiding: false,
         enableSorting: false,
         header: "",
@@ -316,7 +353,8 @@ export function DayPlanTable({
         if (oldIndex !== -1 && newIndex !== -1) {
           const next = arrayMove(rowOrder, oldIndex, newIndex)
           setRowOrder(next)
-          reorderPlanItems(next)
+          const toSave = next.filter((id) => !id.startsWith("pending-"))
+          trackSave(() => reorderPlanItems(toSave))
         }
       }
     }
@@ -348,44 +386,43 @@ export function DayPlanTable({
         title="Plan"
       />
 
-      <div className="min-h-0 flex-1 overflow-auto [&_td]:px-6 [&_th]:px-6">
-        <DndContext
-          collisionDetection={collisionDetection}
-          id="plan-dnd"
-          modifiers={modifiers}
-          onDragEnd={handleDragEnd}
-          onDragStart={handleDragStart}
-          sensors={sensors}
-        >
-          <table>
-            <thead className="sticky top-0 z-10 bg-black">
-              {table.getHeaderGroups().map((headerGroup) => (
-                <tr key={headerGroup.id}>
-                  <SortableContext items={columnOrder} strategy={horizontalListSortingStrategy}>
-                    {headerGroup.headers.map((header) => (
-                      <DraggableHeader
-                        fixedCols={FIXED_COLS}
-                        header={header}
-                        isRatioPartner={sorting.length === 2 && sorting[1].id === header.column.id}
-                        key={header.id}
-                      />
-                    ))}
-                  </SortableContext>
-                </tr>
-              ))}
-            </thead>
-            <tbody>
-              <SortableContext items={tableRowIds} strategy={verticalListSortingStrategy}>
-                {tableRows.length === 0 ? (
-                  <tr>
-                    <td className="text-[#888]" colSpan={columnOrder.length}>
-                      {globalFilter
-                        ? "No items match your search."
-                        : "No items yet. Add foods from the list."}
-                    </td>
+      {tableRows.length === 0 ? (
+        <PlanEmptyState
+          allConsumed={!showConsumed && items.length > 0}
+          searching={!!globalFilter}
+        />
+      ) : (
+        <div className="min-h-0 flex-1 overflow-auto [&_td]:px-6 [&_th]:px-6">
+          <DndContext
+            collisionDetection={collisionDetection}
+            id="plan-dnd"
+            modifiers={modifiers}
+            onDragEnd={handleDragEnd}
+            onDragStart={handleDragStart}
+            sensors={sensors}
+          >
+            <table>
+              <thead className="sticky top-0 z-10 bg-black">
+                {table.getHeaderGroups().map((headerGroup) => (
+                  <tr key={headerGroup.id}>
+                    <SortableContext items={columnOrder} strategy={horizontalListSortingStrategy}>
+                      {headerGroup.headers.map((header) => (
+                        <DraggableHeader
+                          fixedCols={FIXED_COLS}
+                          header={header}
+                          isRatioPartner={
+                            sorting.length === 2 && sorting[1].id === header.column.id
+                          }
+                          key={header.id}
+                        />
+                      ))}
+                    </SortableContext>
                   </tr>
-                ) : (
-                  tableRows.map((row) => (
+                ))}
+              </thead>
+              <tbody>
+                <SortableContext items={tableRowIds} strategy={verticalListSortingStrategy}>
+                  {tableRows.map((row) => (
                     <SortableRow
                       canReorder={canReorderRows}
                       columnOrder={columnOrder}
@@ -394,12 +431,68 @@ export function DayPlanTable({
                       key={row.id}
                       row={row}
                     />
-                  ))
-                )}
-              </SortableContext>
-            </tbody>
-          </table>
-        </DndContext>
+                  ))}
+                </SortableContext>
+              </tbody>
+            </table>
+          </DndContext>
+        </div>
+      )}
+    </div>
+  )
+}
+
+function DeleteButton({ itemId }: { itemId: string }) {
+  const { cancelPendingItem, markRemoved, pendingItemIds, trackSave } = usePlan()
+
+  return (
+    <Button
+      iconOnly
+      onClick={() => {
+        if (pendingItemIds.has(itemId)) {
+          cancelPendingItem(itemId)
+        } else {
+          markRemoved(itemId)
+          trackSave(() => removePlanItem(itemId))
+        }
+      }}
+      type="button"
+      variant="secondary"
+    >
+      <X className="text-red-400" size={14} />
+    </Button>
+  )
+}
+
+function PlanEmptyState({ allConsumed, searching }: { allConsumed: boolean; searching: boolean }) {
+  if (searching && !allConsumed) {
+    return (
+      <div className="flex flex-1 flex-col items-center justify-center gap-2">
+        <SearchX className="text-[#333]" size={28} strokeWidth={1.5} />
+        <div className="flex flex-col items-center gap-1">
+          <p className="font-medium text-[#ededed]">No results</p>
+          <p className="text-sm text-[#555]">No plan items match your search.</p>
+        </div>
+      </div>
+    )
+  }
+  if (allConsumed) {
+    return (
+      <div className="flex flex-1 flex-col items-center justify-center gap-2">
+        <CircleCheck className="text-[#333]" size={28} strokeWidth={1.5} />
+        <div className="flex flex-col items-center gap-1">
+          <p className="font-medium text-[#ededed]">You&apos;re all caught up!</p>
+          <p className="text-sm text-[#555]">Every item on today&apos;s plan is done.</p>
+        </div>
+      </div>
+    )
+  }
+  return (
+    <div className="flex flex-1 flex-col items-center justify-center gap-2">
+      <UtensilsCrossed className="text-[#333]" size={28} strokeWidth={1.5} />
+      <div className="flex flex-col items-center gap-1">
+        <p className="font-medium text-[#ededed]">Plan&apos;s empty</p>
+        <p className="text-sm text-[#555]">Add something from the foods list to start.</p>
       </div>
     </div>
   )

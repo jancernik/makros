@@ -23,8 +23,8 @@ import {
   type SortingState,
   useReactTable
 } from "@tanstack/react-table"
-import { Eye, EyeOff, Plus } from "lucide-react"
-import { useEffect, useMemo, useRef, useState, useTransition } from "react"
+import { CircleCheck, Eye, EyeOff, Plus, SearchX, UtensilsCrossed } from "lucide-react"
+import { useEffect, useMemo, useRef, useState } from "react"
 
 import type { DailyTarget, Food } from "@/db/schema"
 
@@ -33,6 +33,7 @@ import { FormattedNumberInput } from "../../components/ui/formatted-number-input
 import { Toggle } from "../../components/ui/toggle"
 import { addFoodToPlan, reorderFoods } from "../actions"
 import { FoodActionsMenu } from "./food-actions-menu"
+import { type PlanItem, usePlan } from "./plan-provider"
 import {
   applyTableSortingChange,
   DraggableHeader,
@@ -82,8 +83,8 @@ const FIXED_COLS = new Set([...FIXED_START, ...FIXED_END])
 const MIDDLE_COLS = ["amount", "name", "calories", "protein", "fat", "carbohydrates", "notes"]
 
 type FoodsTableProps = {
+  allFoods: Food[]
   date: string
-  foods: Food[]
   initialOrder?: string[]
   initialShowHidden?: boolean
   initialSorting?: SortingState
@@ -92,14 +93,16 @@ type FoodsTableProps = {
 }
 
 export function FoodsTable({
+  allFoods,
   date,
-  foods,
   initialOrder = FOODS_TABLE_DEFAULT_ORDER,
   initialShowHidden = false,
   initialSorting = [],
   initialVisibility = {},
   target
 }: FoodsTableProps) {
+  const { planFoodIds } = usePlan()
+
   const [showHidden, setShowHidden] = useState(initialShowHidden)
   const [globalFilter, setGlobalFilter] = useState("")
   const [sorting, setSorting] = useState<SortingState>(initialSorting)
@@ -109,29 +112,29 @@ export function FoodsTable({
     normalizeColumnOrder(initialOrder, MIDDLE_COLS, FIXED_START, FIXED_END)
   )
 
-  const [rowOrder, setRowOrder] = useState<string[]>(() => foods.map((f) => f.id))
-  const [prevFoods, setPrevFoods] = useState(foods)
+  const [rowOrder, setRowOrder] = useState<string[]>(() => allFoods.map((f) => f.id))
+  const [prevAllFoods, setPrevAllFoods] = useState(allFoods)
   const [amounts, setAmounts] = useState<Record<string, number>>(() =>
-    Object.fromEntries(foods.map((f) => [f.id, Number(f.baseAmount)]))
+    Object.fromEntries(allFoods.map((f) => [f.id, Number(f.baseAmount)]))
   )
   const amountsRef = useRef(amounts)
   amountsRef.current = amounts
   const activeTypeRef = useRef<"column" | "row" | null>(null)
 
-  if (foods !== prevFoods) {
-    setPrevFoods(foods)
-    setRowOrder(foods.map((f) => f.id))
+  if (allFoods !== prevAllFoods) {
+    setPrevAllFoods(allFoods)
+    setRowOrder(allFoods.map((f) => f.id))
   }
 
   useEffect(() => {
     setAmounts((prev) => {
       const additions: Record<string, number> = {}
-      for (const f of foods) {
+      for (const f of allFoods) {
         if (!(f.id in prev)) additions[f.id] = Number(f.baseAmount)
       }
       return Object.keys(additions).length > 0 ? { ...prev, ...additions } : prev
     })
-  }, [foods])
+  }, [allFoods])
 
   useEffect(() => {
     const id = setTimeout(() => {
@@ -140,9 +143,20 @@ export function FoodsTable({
     return () => clearTimeout(id)
   }, [sorting, columnVisibility, columnOrder, showHidden])
 
+  const availableFoods = useMemo(
+    () => allFoods.filter((f) => !planFoodIds.has(f.id)),
+    [allFoods, planFoodIds]
+  )
+
   const visibleFoods = useMemo(
-    () => (showHidden ? foods : foods.filter((f) => !f.hidden)),
-    [foods, showHidden]
+    () => (showHidden ? availableFoods : availableFoods.filter((f) => !f.hidden)),
+    [availableFoods, showHidden]
+  )
+
+  const hasAnyFood = useMemo(() => allFoods.some((f) => !f.hidden), [allFoods])
+  const hasVisibleAvailableFoods = useMemo(
+    () => visibleFoods.some((f) => !planFoodIds.has(f.id)),
+    [visibleFoods, planFoodIds]
   )
 
   const displayFoods = useMemo(() => {
@@ -381,42 +395,44 @@ export function FoodsTable({
         title="Foods"
       />
 
-      <div className="min-h-0 flex-1 overflow-auto [&_td]:px-6 [&_th]:px-6">
-        <DndContext
-          collisionDetection={collisionDetection}
-          id="foods-dnd"
-          modifiers={modifiers}
-          onDragEnd={handleDragEnd}
-          onDragStart={handleDragStart}
-          sensors={sensors}
-        >
-          <table>
-            <thead className="sticky top-0 z-10 bg-black">
-              {table.getHeaderGroups().map((headerGroup) => (
-                <tr key={headerGroup.id}>
-                  <SortableContext items={columnOrder} strategy={horizontalListSortingStrategy}>
-                    {headerGroup.headers.map((header) => (
-                      <DraggableHeader
-                        fixedCols={FIXED_COLS}
-                        header={header}
-                        isRatioPartner={sorting.length === 2 && sorting[1].id === header.column.id}
-                        key={header.id}
-                      />
-                    ))}
-                  </SortableContext>
-                </tr>
-              ))}
-            </thead>
-            <tbody>
-              <SortableContext items={tableRowIds} strategy={verticalListSortingStrategy}>
-                {tableRows.length === 0 ? (
-                  <tr>
-                    <td className="text-[#888]" colSpan={columnOrder.length}>
-                      {globalFilter ? "No foods match your search." : "No foods yet."}
-                    </td>
+      {tableRows.length === 0 ? (
+        <FoodsEmptyState
+          hasAnyFood={hasAnyFood}
+          hasVisibleAvailableFoods={hasVisibleAvailableFoods}
+          searching={!!globalFilter}
+        />
+      ) : (
+        <div className="min-h-0 flex-1 overflow-auto [&_td]:px-6 [&_th]:px-6">
+          <DndContext
+            collisionDetection={collisionDetection}
+            id="foods-dnd"
+            modifiers={modifiers}
+            onDragEnd={handleDragEnd}
+            onDragStart={handleDragStart}
+            sensors={sensors}
+          >
+            <table>
+              <thead className="sticky top-0 z-10 bg-black">
+                {table.getHeaderGroups().map((headerGroup) => (
+                  <tr key={headerGroup.id}>
+                    <SortableContext items={columnOrder} strategy={horizontalListSortingStrategy}>
+                      {headerGroup.headers.map((header) => (
+                        <DraggableHeader
+                          fixedCols={FIXED_COLS}
+                          header={header}
+                          isRatioPartner={
+                            sorting.length === 2 && sorting[1].id === header.column.id
+                          }
+                          key={header.id}
+                        />
+                      ))}
+                    </SortableContext>
                   </tr>
-                ) : (
-                  tableRows.map((row) => (
+                ))}
+              </thead>
+              <tbody>
+                <SortableContext items={tableRowIds} strategy={verticalListSortingStrategy}>
+                  {tableRows.map((row) => (
                     <SortableRow
                       canReorder={canReorderRows}
                       columnOrder={columnOrder}
@@ -425,28 +441,53 @@ export function FoodsTable({
                       key={row.id}
                       row={row}
                     />
-                  ))
-                )}
-              </SortableContext>
-            </tbody>
-          </table>
-        </DndContext>
-      </div>
+                  ))}
+                </SortableContext>
+              </tbody>
+            </table>
+          </DndContext>
+        </div>
+      )}
     </div>
   )
 }
 
 function AddButtonCell({ amount, date, food }: { amount: number; date: string; food: Food }) {
-  const [isPending, startTransition] = useTransition()
+  const { addPendingItem, cancelPendingItem, promotePendingItem, trackSave } = usePlan()
 
   return (
     <Button
-      disabled={isPending}
       iconOnly
       onClick={() => {
-        startTransition(async () => {
-          await addFoodToPlan(food.id, date, amount)
-        })
+        const tempId = `pending-${food.id}`
+        const now = new Date()
+        addPendingItem({
+          amount,
+          consumedAmount: 0,
+          createdAt: now,
+          dayPlanId: "",
+          food,
+          foodId: food.id,
+          id: tempId,
+          position: 0,
+          updatedAt: now
+        } as PlanItem)
+        trackSave(() =>
+          addFoodToPlan(food.id, date, amount).then((result) => {
+            if (result) {
+              promotePendingItem(tempId, {
+                ...result,
+                amount,
+                createdAt: now,
+                food,
+                foodId: food.id,
+                updatedAt: now
+              } as PlanItem)
+            } else {
+              cancelPendingItem(tempId)
+            }
+          })
+        )
       }}
       type="button"
       variant="secondary"
@@ -474,5 +515,47 @@ function AmountInputCell({
       unit={food.unit !== "unit" ? food.unit : undefined}
       value={amount}
     />
+  )
+}
+
+function FoodsEmptyState({
+  hasAnyFood,
+  hasVisibleAvailableFoods,
+  searching
+}: {
+  hasAnyFood: boolean
+  hasVisibleAvailableFoods: boolean
+  searching: boolean
+}) {
+  if (searching && hasAnyFood && hasVisibleAvailableFoods) {
+    return (
+      <div className="flex flex-1 flex-col items-center justify-center gap-2">
+        <SearchX className="text-[#333]" size={28} strokeWidth={1.5} />
+        <div className="flex flex-col items-center gap-1">
+          <p className="font-medium text-[#ededed]">No results</p>
+          <p className="text-sm text-[#555]">No food items match your search.</p>
+        </div>
+      </div>
+    )
+  }
+  if (hasAnyFood) {
+    return (
+      <div className="flex flex-1 flex-col items-center justify-center gap-2">
+        <CircleCheck className="text-[#333]" size={28} strokeWidth={1.5} />
+        <div className="flex flex-col items-center gap-1">
+          <p className="font-medium text-[#ededed]">Nothing left to add</p>
+          <p className="text-sm text-[#555]">Every food is already on today&apos;s plan.</p>
+        </div>
+      </div>
+    )
+  }
+  return (
+    <div className="flex flex-1 flex-col items-center justify-center gap-2">
+      <UtensilsCrossed className="text-[#333]" size={28} strokeWidth={1.5} />
+      <div className="flex flex-col items-center gap-1">
+        <p className="font-medium text-[#ededed]">Nothing here yet</p>
+        <p className="text-sm text-[#555]">Add your first food to start tracking.</p>
+      </div>
+    </div>
   )
 }

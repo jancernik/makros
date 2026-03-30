@@ -15,7 +15,7 @@ type VisualProps = {
 }
 
 const baseClasses =
-  "inline-flex items-center justify-center gap-2 border border-[#2a2a2a] text-(--text) cursor-pointer font-[inherit] transition-[background-color,border-color] duration-100 whitespace-nowrap disabled:opacity-[0.35] disabled:cursor-not-allowed"
+  "inline-flex items-center justify-center gap-2 border border-[#2a2a2a] text-(--text) cursor-pointer font-[inherit] transition-[background-color,border-color] duration-100 whitespace-nowrap disabled:opacity-[0.35] disabled:cursor-not-allowed leading-1"
 
 const sizeClasses: Record<Size, string> = {
   lg: "h-11 px-5 text-[15px]",

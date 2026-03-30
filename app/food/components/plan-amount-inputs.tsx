@@ -1,11 +1,11 @@
 "use client"
 
 import { Check } from "lucide-react"
-import { useOptimistic, useTransition } from "react"
 
 import { Button } from "../../components/ui/button"
 import { FormattedNumberInput } from "../../components/ui/formatted-number-input"
 import { markFullyConsumed, setConsumedAmount, setPlannedAmount } from "../actions"
+import { usePlan } from "./plan-provider"
 
 type Props = {
   amount: number
@@ -15,14 +15,11 @@ type Props = {
 }
 
 export function PlanAmountInputs({ amount, consumedAmount, itemId, unit }: Props) {
-  const [, startPlannedTransition] = useTransition()
-  const [optimisticAmount, setOptimisticAmount] = useOptimistic(amount)
-
-  const [, startConsumedTransition] = useTransition()
-  const [optimisticConsumed, setOptimisticConsumed] = useOptimistic(consumedAmount)
-
-  const done = optimisticConsumed >= optimisticAmount
+  const { trackSave, updateAmounts } = usePlan()
   const displayUnit = unit !== "unit" ? unit : undefined
+  const isPending = itemId.startsWith("pending-")
+
+  const done = consumedAmount >= amount
 
   return (
     <div className="flex items-center gap-2">
@@ -32,35 +29,39 @@ export function PlanAmountInputs({ amount, consumedAmount, itemId, unit }: Props
         min="1"
         onCommit={(value) => {
           if (value <= 0) return
-          startPlannedTransition(async () => {
-            setOptimisticAmount(value)
-            await setPlannedAmount(itemId, value)
-          })
+          updateAmounts(itemId, value, Math.min(consumedAmount, value))
+          if (!isPending) trackSave(() => setPlannedAmount(itemId, value))
         }}
         unit={displayUnit}
-        value={optimisticAmount}
+        value={amount}
       />
       <FormattedNumberInput
         className="w-16"
         inputMode="decimal"
-        max={optimisticAmount}
+        max={amount}
         min="0"
         onCommit={(value) => {
           if (value < 0) return
-          const clamped = Math.min(value, optimisticAmount)
-          startConsumedTransition(async () => {
-            setOptimisticConsumed(clamped)
-            await setConsumedAmount(itemId, optimisticAmount, value)
-          })
+          const clamped = Math.min(value, amount)
+          updateAmounts(itemId, amount, clamped)
+          if (!isPending) trackSave(() => setConsumedAmount(itemId, amount, value))
         }}
         unit={displayUnit}
-        value={optimisticConsumed}
+        value={consumedAmount}
       />
-      <form action={markFullyConsumed.bind(null, itemId, optimisticAmount)}>
-        <Button className="disabled:opacity-[1]" disabled={done} iconOnly type="submit">
-          <Check size={14} />
-        </Button>
-      </form>
+      <Button
+        className="disabled:opacity-[1]"
+        disabled={done}
+        iconOnly
+        onClick={() => {
+          if (done) return
+          updateAmounts(itemId, amount, amount)
+          if (!isPending) trackSave(() => markFullyConsumed(itemId, amount))
+        }}
+        type="button"
+      >
+        <Check size={14} />
+      </Button>
     </div>
   )
 }

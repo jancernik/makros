@@ -1,28 +1,41 @@
+"use client"
+
+import { useMemo } from "react"
+
 import type { DailyTarget } from "@/db/schema"
 
-import type { getDayPlanByDate } from "../queries"
-
 import { formatNumber } from "../utils"
+import { usePlan } from "./plan-provider"
 
 type Props = {
-  plan: Awaited<ReturnType<typeof getDayPlanByDate>>
   target: DailyTarget | undefined
 }
 
-export function MacroBar({ plan, target }: Props) {
-  const items = plan?.items ?? []
+export function MacroBar({ target }: Props) {
+  const { amounts, baseItems, pendingItems, removedIds } = usePlan()
 
-  const totals = items.reduce(
-    (acc, item) => {
-      const ratio = item.food.baseAmount > 0 ? item.amount / item.food.baseAmount : 0
-      return {
-        calories: acc.calories + ratio * item.food.calories,
-        carbohydrates: acc.carbohydrates + ratio * item.food.carbohydrates,
-        fat: acc.fat + ratio * item.food.fat,
-        protein: acc.protein + ratio * item.food.protein
-      }
-    },
-    { calories: 0, carbohydrates: 0, fat: 0, protein: 0 }
+  const allItems = useMemo(
+    () => [...baseItems.filter((i) => !removedIds.has(i.id)), ...pendingItems],
+    [baseItems, removedIds, pendingItems]
+  )
+
+  const totals = useMemo(
+    () =>
+      allItems.reduce(
+        (acc, item) => {
+          const override = amounts[item.id]
+          const amount = override?.amount ?? item.amount
+          const ratio = item.food.baseAmount > 0 ? amount / item.food.baseAmount : 0
+          return {
+            calories: acc.calories + ratio * item.food.calories,
+            carbohydrates: acc.carbohydrates + ratio * item.food.carbohydrates,
+            fat: acc.fat + ratio * item.food.fat,
+            protein: acc.protein + ratio * item.food.protein
+          }
+        },
+        { calories: 0, carbohydrates: 0, fat: 0, protein: 0 }
+      ),
+    [allItems, amounts]
   )
 
   const macros = [

@@ -13,20 +13,34 @@ import { requireAuth } from "../auth/lib"
 import { getMostRecentTarget } from "./queries"
 import { foodFormSchema, targetsFormSchema } from "./schemas"
 
-export async function addFoodToPlan(foodId: string, date: string, amount: number) {
+export async function addFoodToPlan(
+  foodId: string,
+  date: string,
+  amount: number
+): Promise<
+  undefined | { consumedAmount: number; dayPlanId: string; id: string; position: number }
+> {
   await requireAuth()
   if (!amount || amount <= 0 || isNaN(amount)) return
 
   const planId = await ensurePlan(date)
 
-  await db.insert(dayPlanItems).values({
-    amount,
-    dayPlanId: planId,
-    foodId,
-    position: sql`(SELECT COALESCE(MAX(${dayPlanItems.position}), -1) + 1 FROM ${dayPlanItems} WHERE ${dayPlanItems.dayPlanId} = ${planId})`
-  })
+  const [item] = await db
+    .insert(dayPlanItems)
+    .values({
+      amount,
+      dayPlanId: planId,
+      foodId,
+      position: sql`(SELECT COALESCE(MAX(${dayPlanItems.position}), -1) + 1 FROM ${dayPlanItems} WHERE ${dayPlanItems.dayPlanId} = ${planId})`
+    })
+    .returning({
+      consumedAmount: dayPlanItems.consumedAmount,
+      dayPlanId: dayPlanItems.dayPlanId,
+      id: dayPlanItems.id,
+      position: dayPlanItems.position
+    })
 
-  revalidatePath("/food")
+  return item
 }
 
 export async function createFood(
@@ -134,13 +148,11 @@ export async function markFullyConsumed(itemId: string, amount: number) {
   await requireAuth()
   if (!amount || amount <= 0 || isNaN(amount) || !isFinite(amount)) return
   await db.update(dayPlanItems).set({ consumedAmount: amount }).where(eq(dayPlanItems.id, itemId))
-  revalidatePath("/food")
 }
 
 export async function removePlanItem(itemId: string) {
   await requireAuth()
   await db.delete(dayPlanItems).where(eq(dayPlanItems.id, itemId))
-  revalidatePath("/food")
 }
 
 export async function reorderFoods(ids: string[]) {
@@ -158,7 +170,6 @@ export async function reorderPlanItems(ids: string[]) {
       db.update(dayPlanItems).set({ position }).where(eq(dayPlanItems.id, id))
     )
   )
-  revalidatePath("/food")
 }
 
 export async function setConsumedAmount(itemId: string, maxAmount: number, value: number) {
@@ -169,7 +180,6 @@ export async function setConsumedAmount(itemId: string, maxAmount: number, value
     .update(dayPlanItems)
     .set({ consumedAmount: Math.min(value, maxAmount) })
     .where(eq(dayPlanItems.id, itemId))
-  revalidatePath("/food")
 }
 
 export async function setFoodHidden(foodId: string, hidden: boolean) {
@@ -188,7 +198,6 @@ export async function setPlannedAmount(itemId: string, value: number) {
       consumedAmount: sql`LEAST(${dayPlanItems.consumedAmount}, ${value})`
     })
     .where(eq(dayPlanItems.id, itemId))
-  revalidatePath("/food")
 }
 
 export async function updateFood(

@@ -11,7 +11,7 @@ type Props = {
 type Size = "lg" | "md" | "sm"
 
 const baseClasses =
-  "inline-flex cursor-pointer items-center gap-2 border font-[inherit] font-semibold uppercase tracking-wider whitespace-nowrap transition-colors duration-100"
+  "inline-flex cursor-pointer items-center gap-2 border font-[inherit] font-semibold uppercase tracking-wider whitespace-nowrap transition-colors duration-100 leading-1"
 
 const sizeClasses: Record<Size, string> = {
   lg: "h-11 px-5 text-[13px]",
