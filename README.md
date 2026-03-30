@@ -1,36 +1,95 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+<div align="center">
 
-## Getting Started
+# Makros
 
-First, run the development server:
+**Self-hosted macro and nutrition tracker**
+
+</div>
+
+Yet another project I built for myself :).
+
+I've been doing calisthenics for years, but I never really tracked my food properly, so I decided to give it a shot. Turns out it's kind of annoying ngl. Like a lot of my projects, this started as a spreadsheet, but once it got more complex I started running into its limits.
+
+I briefly looked at some existing trackers, but I like things my own way and, well, I also like building stuff, so I quickly gave up on those and made this instead.
+
+This project is meant to stay simple and flexible. It doesn't force you into a specific workflow, meal plan, or structure. A lot of it is inspired by the spreadsheet setup I was using before, just in a way that's much nicer to use.
+
+**Demo:** [demo.makros.cuasar.cc](https://demo.makros.cuasar.cc) — resets daily, no login required.
+
+> I use this almost exclusively on desktop and haven't really bothered making it look good on mobile. Maybe someday. No promises.
+
+---
+
+## Features
+
+- Create foods with their calories and macros, then use them to build your daily plans.
+- Edit, hide, delete, and duplicate foods.
+- Set daily calorie and macro goals.
+- Track intake in real time against your targets.
+- Mark planned foods as eaten or partially eaten.
+- Search, reorder, resize, and customize the layout.
+
+---
+
+## Getting started
+
+### Prerequisites
+
+- Node.js 18+
+- PostgreSQL
+
+### Installation
+
+Clone the repository:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone https://github.com/jancernik/makros.git
+cd makros
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Install dependencies:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+pnpm install
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Set up environment variables:
 
-## Learn More
+```bash
+cp .env.example .env.local
+```
 
-To learn more about Next.js, take a look at the following resources:
+Create the database and run migrations:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+pnpm db:create
+pnpm db:migrate
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Development
 
-## Deploy on Vercel
+Start the development server:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```bash
+pnpm dev
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Production
+
+Build the app and start the production server:
+
+```bash
+pnpm build && pnpm start
+```
+
+## Database commands
+
+| Command            | Description                             |
+| ------------------ | --------------------------------------- |
+| `pnpm db:create`   | Create the database                     |
+| `pnpm db:drop`     | Drop the database                       |
+| `pnpm db:reset`    | Truncate all tables                     |
+| `pnpm db:migrate`  | Run migrations                          |
+| `pnpm db:generate` | Generate migrations from schema changes |
+| `pnpm db:studio`   | Run Drizzle Studio                      |
+| `pnpm db:seed`     | Seed sample foods and plans             |
