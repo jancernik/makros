@@ -57,7 +57,7 @@ export function DatePicker({ date, today }: Props) {
                 week: "border-0",
                 weekday: "!px-0 py-1 text-center text-[11px] uppercase tracking-wide text-[#555]",
                 weekdays: "mb-1 border-0",
-                weeks: "border-0"
+                weeks: "border-0 [&>tr:first-child>td]:pt-3"
               }}
               components={{
                 DayButton: ({ modifiers, ...props }: DayButtonProps) => (
