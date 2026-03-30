@@ -7,6 +7,7 @@ import { ReactNode } from "react"
 
 import "./globals.css"
 import { TimezoneSync } from "./components/timezone-sync"
+import { Toaster } from "./components/toaster"
 
 export const metadata: Metadata = {
   description: "Macro tracker",
@@ -30,6 +31,7 @@ export default function RootLayout({
         />
         {children}
         <TimezoneSync />
+        <Toaster />
         <SpeedInsights />
         <Analytics />
       </body>

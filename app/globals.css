@@ -175,3 +175,14 @@ input[type="number"] {
   -moz-appearance: textfield;
   appearance: textfield;
 }
+
+/* react-hot-toast */
+[role="status"] {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* react-day-picker */
+.calendar tr:hover {
+  background-color: transparent;
+}

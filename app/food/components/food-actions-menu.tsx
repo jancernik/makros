@@ -1,8 +1,9 @@
 "use client"
 
 import { Copy, Eye, EyeOff, MoreHorizontal, Pencil, Trash2 } from "lucide-react"
-import { useRouter } from "next/navigation"
-import { useState, useTransition } from "react"
+import { useRouter } from "nextjs-toploader/app"
+import { useTransition } from "react"
+import toast from "react-hot-toast"
 
 import { Button } from "../../components/ui/button"
 import {
@@ -21,43 +22,35 @@ type Props = {
 }
 
 export function FoodActionsMenu({ foodId, isHidden }: Props) {
-  const [_error, setError] = useState<null | string>(null)
   const [isPending, startTransition] = useTransition()
   const router = useRouter()
 
   function handleDuplicate() {
-    setError(null)
-
     startTransition(async () => {
       const result = await duplicateFood(foodId)
-
       if ("error" in result) {
-        setError(result.error)
-        alert(result.error)
+        toast.error(result.error)
         return
       }
-
+      toast.success("Food duplicated")
       router.push(`/food/${result.id}/edit`)
     })
   }
 
   function handleToggleHidden() {
-    setError(null)
-
     startTransition(async () => {
       await setFoodHidden(foodId, !isHidden)
+      toast.success(isHidden ? "Food unhidden" : "Food hidden")
     })
   }
 
   function handleDelete() {
-    setError(null)
-
     startTransition(async () => {
       const result = await deleteFood(foodId)
-
       if (result?.error) {
-        setError(result.error)
-        alert(result.error)
+        toast.error(result.error)
+      } else {
+        toast.success("Food deleted")
       }
     })
   }

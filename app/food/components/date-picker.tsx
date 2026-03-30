@@ -48,7 +48,6 @@ export function DatePicker({ date, today }: Props) {
         </FloatTrigger>
         <FloatContent align="center" estimatedWidth={250}>
           <div className="calendar" style={{ width: 250 }}>
-            <style>{`.calendar tr:hover { background-color: transparent; }`}</style>
             <DayPicker
               classNames={{
                 day: "p-0 border-0",
