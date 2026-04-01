@@ -7,7 +7,7 @@ export function Toaster() {
   return (
     <HotToaster
       toastOptions={{
-        duration: 40000,
+        duration: 4000,
         error: {
           icon: <XCircle className="text-red-400" size={14} />
         },
