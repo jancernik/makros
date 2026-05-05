@@ -165,10 +165,10 @@ export function WeightClient({ defaultLeftPct = 50, entries, targets }: WeightCl
   )
 
   const trendDataset = useMemo(() => {
-    const fn = linearRegression(sliced)
-    if (!fn || sliced.length < 2) return null
-    const first = sliced[0].date
-    const last = sliced[sliced.length - 1].date
+    const fn = linearRegression(entries)
+    if (!fn || entries.length < 2) return null
+    const first = rangeStart
+    const last = todayStr
     return {
       backgroundColor: "transparent",
       borderColor: "rgba(255,176,107,0.4)",
@@ -183,7 +183,7 @@ export function WeightClient({ defaultLeftPct = 50, entries, targets }: WeightCl
       pointRadius: 0,
       tension: 0
     }
-  }, [sliced])
+  }, [entries, rangeStart, todayStr])
 
   const datasets = useMemo(
     () => [...targetDatasets, weightDataset, ...(trendDataset ? [trendDataset] : [])],
@@ -224,7 +224,7 @@ export function WeightClient({ defaultLeftPct = 50, entries, targets }: WeightCl
   const chartOptions = useMemo(
     () => ({
       animation: false as const,
-      interaction: { intersect: false, mode: "index" as const },
+      interaction: { axis: "x" as const, intersect: false, mode: "nearest" as const },
       maintainAspectRatio: false,
       onClick: (_: unknown, elements: { datasetIndex: number; index: number }[]) => {
         if (!elements.length) return
@@ -276,7 +276,8 @@ export function WeightClient({ defaultLeftPct = 50, entries, targets }: WeightCl
               return (item.raw as { y: null | number }).y !== null
             return true
           },
-          footerColor: "#999"
+          footerColor: "#999",
+          position: "nearest" as const
         },
         zoom: {
           ...zoomPanPlugin,
@@ -534,7 +535,7 @@ function TargetRow({ target }: { target: WeightTarget }) {
 
   const detail =
     target.type === "rate"
-      ? `${target.minTargetRate ?? 0.25} –  1${target.maxTargetRate ?? 0.5} kg/wk from ${target.startWeight ?? "?"} kg`
+      ? `${target.minTargetRate ?? 0.25} – ${target.maxTargetRate ?? 0.5} kg/wk from ${target.startWeight ?? "?"} kg`
       : `${target.targetWeight ?? "?"} kg`
 
   function handleDelete() {
