@@ -36,7 +36,7 @@ export function LogWeightForm({ entry }: { entry?: null | WeightEntry }) {
           min="0"
           name="weight"
           placeholder="75.0"
-          step="0.1"
+          step="0.01"
           type="number"
           unit="kg"
         />
