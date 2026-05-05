@@ -76,7 +76,7 @@ export async function createFood(
       unit: data.unit
     })
 
-    revalidatePath("/food")
+    revalidateFood()
 
     return { errors: {}, message: "Food created successfully.", success: true }
   } catch (error) {
@@ -111,7 +111,7 @@ export async function deleteFood(foodId: string): Promise<undefined | { error: s
   }
 
   await db.delete(foods).where(eq(foods.id, foodId))
-  revalidatePath("/food")
+  revalidateFood()
 }
 
 export async function duplicateFood(foodId: string): Promise<{ error: string } | { id: string }> {
@@ -134,7 +134,7 @@ export async function duplicateFood(foodId: string): Promise<{ error: string } |
         unit: food.unit
       })
       .returning({ id: foods.id })
-    revalidatePath("/food")
+    revalidateFood()
     return { id: newFood.id }
   } catch (error) {
     if (isUniqueViolation(error)) {
@@ -160,7 +160,7 @@ export async function reorderFoods(ids: string[]) {
   await Promise.all(
     ids.map((id, position) => db.update(foods).set({ position }).where(eq(foods.id, id)))
   )
-  revalidatePath("/food")
+  revalidateFood()
 }
 
 export async function reorderPlanItems(ids: string[]) {
@@ -185,7 +185,7 @@ export async function setConsumedAmount(itemId: string, maxAmount: number, value
 export async function setFoodHidden(foodId: string, hidden: boolean) {
   await requireAuth()
   await db.update(foods).set({ hidden }).where(eq(foods.id, foodId))
-  revalidatePath("/food")
+  revalidateFood()
 }
 
 export async function setPlannedAmount(itemId: string, value: number) {
@@ -236,7 +236,7 @@ export async function updateFood(
       })
       .where(eq(foods.id, id))
 
-    revalidatePath("/food")
+    revalidateFood()
 
     return { errors: {}, message: "Food updated successfully.", success: true }
   } catch (error) {
@@ -281,7 +281,7 @@ export async function upsertDailyTarget(
       target: dailyTargets.dayPlanId
     })
 
-  revalidatePath("/food")
+  revalidateFood()
   return { error: null, success: true }
 }
 
@@ -302,7 +302,7 @@ export async function upsertDayPlanNote(
     .set({ note: note.trim() || null, updatedAt: new Date() })
     .where(eq(dayPlans.id, planId))
 
-  revalidatePath("/food")
+  revalidateFood()
   return { error: null, success: true }
 }
 
@@ -334,4 +334,9 @@ function isUniqueViolation(error: unknown): boolean {
   if ("code" in error && (error as { code: unknown }).code === "23505") return true
   if ("cause" in error) return isUniqueViolation((error as { cause: unknown }).cause)
   return false
+}
+
+function revalidateFood() {
+  revalidatePath("/food")
+  revalidatePath("/food/history")
 }
