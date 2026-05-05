@@ -1,6 +1,13 @@
 import { randomUUID } from "crypto"
 
-import { dailyTargets, dayPlanItems, dayPlans, foods } from "../schema"
+import {
+  dailyTargets,
+  dayPlanItems,
+  dayPlans,
+  foods,
+  weightEntries,
+  weightTargets
+} from "../schema"
 import { defineSeed } from "./lib"
 
 const today = new Date()
@@ -17,6 +24,80 @@ const toLocalDateOnly = (date: Date) => {
 const yesterdayDate = toLocalDateOnly(yesterday)
 const todayDate = toLocalDateOnly(today)
 const tomorrowDate = toLocalDateOnly(tomorrow)
+const daysAgoDate = (daysAgo: number) => {
+  const date = new Date(today)
+  date.setDate(today.getDate() - daysAgo)
+  return toLocalDateOnly(date)
+}
+
+const sampleWeightLogs: Array<{ daysAgo: number; note?: string; weight: number }> = [
+  { daysAgo: 72, weight: 73.25 },
+  { daysAgo: 71, weight: 72.95 },
+  { daysAgo: 70, weight: 73.15 },
+  { daysAgo: 69, weight: 73.55 },
+  { daysAgo: 68, weight: 73.5 },
+  { daysAgo: 66, weight: 74.15 },
+  { daysAgo: 64, weight: 74.25 },
+  { daysAgo: 63, weight: 74.5 },
+  { daysAgo: 62, weight: 74.3 },
+  { daysAgo: 61, weight: 74.1 },
+  { daysAgo: 60, note: "Late dinner the night before.", weight: 73.25 },
+  { daysAgo: 59, weight: 72.95 },
+  { daysAgo: 58, weight: 74.5 },
+  { daysAgo: 57, weight: 74.0 },
+  { daysAgo: 56, weight: 73.45 },
+  { daysAgo: 55, weight: 73.55 },
+  { daysAgo: 54, weight: 73.95 },
+  { daysAgo: 53, weight: 74.05 },
+  { daysAgo: 52, weight: 73.65 },
+  { daysAgo: 50, weight: 74.3 },
+  { daysAgo: 49, weight: 74.4 },
+  { daysAgo: 48, weight: 73.65 },
+  { daysAgo: 47, weight: 73.75 },
+  { daysAgo: 46, weight: 74.65 },
+  { daysAgo: 44, weight: 73.95 },
+  { daysAgo: 43, weight: 74.8 },
+  { daysAgo: 41, weight: 74.5 },
+  { daysAgo: 40, note: "Long walk and lighter meals.", weight: 73.2 },
+  { daysAgo: 39, weight: 74.05 },
+  { daysAgo: 38, weight: 74.65 },
+  { daysAgo: 37, weight: 73.95 },
+  { daysAgo: 36, weight: 74.45 },
+  { daysAgo: 35, weight: 74.35 },
+  { daysAgo: 34, weight: 74.05 },
+  { daysAgo: 33, weight: 74.4 },
+  { daysAgo: 32, weight: 74.5 },
+  { daysAgo: 31, weight: 75.65 },
+  { daysAgo: 30, weight: 74.6 },
+  { daysAgo: 29, weight: 74.15 },
+  { daysAgo: 28, weight: 74.1 },
+  { daysAgo: 27, weight: 74.7 },
+  { daysAgo: 26, weight: 74.9 },
+  { daysAgo: 25, weight: 75.6 },
+  { daysAgo: 24, weight: 75.4 },
+  { daysAgo: 23, weight: 75.3 },
+  { daysAgo: 22, weight: 75.55 },
+  { daysAgo: 21, weight: 74.8 },
+  { daysAgo: 20, weight: 75.1 },
+  { daysAgo: 19, note: "Higher carbs over the weekend.", weight: 76.15 },
+  { daysAgo: 18, weight: 75.4 },
+  { daysAgo: 17, weight: 75.7 },
+  { daysAgo: 16, weight: 75.75 },
+  { daysAgo: 15, weight: 76.1 },
+  { daysAgo: 14, weight: 75.4 },
+  { daysAgo: 12, weight: 76.55 },
+  { daysAgo: 11, weight: 76.15 },
+  { daysAgo: 10, weight: 75.7 },
+  { daysAgo: 9, weight: 75.6 },
+  { daysAgo: 8, weight: 75.7 },
+  { daysAgo: 7, weight: 76.25 },
+  { daysAgo: 6, weight: 76.05 },
+  { daysAgo: 4, weight: 76.85 },
+  { daysAgo: 3, weight: 77.35 },
+  { daysAgo: 2, weight: 77.3 },
+  { daysAgo: 1, weight: 77.55 },
+  { daysAgo: 0, weight: 77.75 }
+]
 
 export const seedIds = {
   dailyTargets: {
@@ -113,6 +194,9 @@ export const seedIds = {
     tunaInWater: randomUUID(),
     wheatFlour: randomUUID(),
     whiteRice: randomUUID()
+  },
+  weightTargets: {
+    main: randomUUID()
   }
 }
 
@@ -721,6 +805,26 @@ export const seedEntries = [
       fat: 70,
       id: seedIds.dailyTargets.tomorrow,
       protein: 180
+    }
+  ]),
+
+  defineSeed(
+    weightEntries,
+    sampleWeightLogs.map(({ daysAgo, note, weight }) => ({
+      date: daysAgoDate(daysAgo),
+      note: note ?? null,
+      weight
+    }))
+  ),
+
+  defineSeed(weightTargets, [
+    {
+      id: seedIds.weightTargets.main,
+      maxTargetRate: 0.5,
+      minTargetRate: 0.25,
+      startDate: daysAgoDate(sampleWeightLogs[0].daysAgo),
+      startWeight: sampleWeightLogs[0].weight,
+      type: "rate"
     }
   ]),
 

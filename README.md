@@ -14,7 +14,7 @@ I briefly looked at some existing trackers, but I like things my own way and, we
 
 This project is meant to stay simple and flexible. It doesn't force you into a specific workflow, meal plan, or structure. A lot of it is inspired by the spreadsheet setup I was using before, just in a way that's much nicer to use.
 
-**Demo:** [demo.makros.cuasar.cc](https://demo.makros.cuasar.cc) — resets daily, no login required.
+**Demo:** [demo.makros.cuasar.cc](https://demo.makros.cuasar.cc) — resets daily with sample food and weight data, no login required.
 
 > I use this almost exclusively on desktop and haven't really bothered making it look good on mobile. Maybe someday. No promises.
 
@@ -27,6 +27,8 @@ This project is meant to stay simple and flexible. It doesn't force you into a s
 - Set daily calorie and macro goals.
 - Track intake in real time against your targets.
 - Mark planned foods as eaten or partially eaten.
+- Log body weight over time.
+- Set fixed or rate-based weight targets.
 - Search, reorder, resize, and customize the layout.
 
 ---
@@ -84,12 +86,12 @@ pnpm build && pnpm start
 
 ## Database commands
 
-| Command            | Description                             |
-| ------------------ | --------------------------------------- |
-| `pnpm db:create`   | Create the database                     |
-| `pnpm db:drop`     | Drop the database                       |
-| `pnpm db:reset`    | Truncate all tables                     |
-| `pnpm db:migrate`  | Run migrations                          |
-| `pnpm db:generate` | Generate migrations from schema changes |
-| `pnpm db:studio`   | Run Drizzle Studio                      |
-| `pnpm db:seed`     | Seed sample foods and plans             |
+| Command            | Description                               |
+| ------------------ | ----------------------------------------- |
+| `pnpm db:create`   | Create the database                       |
+| `pnpm db:drop`     | Drop the database                         |
+| `pnpm db:reset`    | Truncate all tables                       |
+| `pnpm db:migrate`  | Run migrations                            |
+| `pnpm db:generate` | Generate migrations from schema changes   |
+| `pnpm db:studio`   | Run Drizzle Studio                        |
+| `pnpm db:seed`     | Seed sample foods, plans, and weight logs |
