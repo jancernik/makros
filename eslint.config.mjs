@@ -17,6 +17,11 @@ const eslintConfig = defineConfig([
         }
       ],
       "react-hooks/incompatible-library": "off"
+    },
+    settings: {
+      react: {
+        version: "19"
+      }
     }
   },
   // Override default ignores of eslint-config-next.

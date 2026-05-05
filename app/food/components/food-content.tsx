@@ -1,6 +1,6 @@
 "use client"
 
-import { LogOut, PlusCircle, Ruler, SquarePen } from "lucide-react"
+import { LogOut, PlusCircle, Ruler, SquarePen, TrendingUp } from "lucide-react"
 
 import type { DailyTarget, Food } from "@/db/schema"
 
@@ -52,6 +52,9 @@ export function FoodContent({
               <SaveIcon className="ml-6 mr-3" />
               <ButtonLink href={`/food/targets?date=${date}`}>
                 <Ruler size={15} /> Targets
+              </ButtonLink>
+              <ButtonLink href="/food/history">
+                <TrendingUp size={15} /> History
               </ButtonLink>
               <ButtonLink href={`/food/note?date=${date}`}>
                 <SquarePen size={15} /> Note

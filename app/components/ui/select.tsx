@@ -116,7 +116,7 @@ export function Select({
       }),
       valueContainer: (base) => ({
         ...base,
-        padding: "0 0.6rem"
+        padding: "0 0 0 0.6rem"
       })
     }),
     [error, fontSize, height, isDisabled, optionPadding]

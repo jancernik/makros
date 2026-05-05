@@ -61,7 +61,9 @@ export function PlanProvider({
   const inFlightIds = useRef<Set<string>>(new Set())
   const cancelledPendingIds = useRef<Set<string>>(new Set())
   const amountsRef = useRef(amounts)
-  amountsRef.current = amounts
+  useEffect(() => {
+    amountsRef.current = amounts
+  })
   const [saveStatus, setSaveStatus] = useState<SaveStatus>("idle")
   const inFlightSaves = useRef(0)
   const savedTimerRef = useRef<null | ReturnType<typeof setTimeout>>(null)
@@ -75,8 +77,6 @@ export function PlanProvider({
     setAmounts(initialAmounts(newItems))
     setRemovedIds(new Set())
     setPendingItems([])
-    inFlightIds.current = new Set()
-    cancelledPendingIds.current = new Set()
   } else if (plan !== prevPlan) {
     setPrevPlan(plan)
     const newItems = plan?.items ?? []
@@ -86,6 +86,11 @@ export function PlanProvider({
     setRemovedIds(new Set())
     setPendingItems((prev) => prev.filter((i) => !newFoodIds.has(i.foodId)))
   }
+
+  useEffect(() => {
+    inFlightIds.current = new Set()
+    cancelledPendingIds.current = new Set()
+  }, [date])
 
   useEffect(() => {
     if (saveStatus !== "saving" && saveStatus !== "error") return

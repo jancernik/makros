@@ -2,25 +2,30 @@
 
 import { useCallback, useEffect, useRef, useState } from "react"
 
-const COOKIE_KEY = "panels-layout"
-
 type Props = {
   className?: string
+  cookieKey?: string
   defaultLeftPct?: number
   left: React.ReactNode
   right: React.ReactNode
 }
 
-export function ResizablePanels({ className, defaultLeftPct = 50, left, right }: Props) {
+export function ResizablePanels({
+  className,
+  cookieKey = "panels-layout",
+  defaultLeftPct = 50,
+  left,
+  right
+}: Props) {
   const [leftPct, setLeftPct] = useState(defaultLeftPct)
   const containerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     const id = setTimeout(() => {
-      document.cookie = `${COOKIE_KEY}=${encodeURIComponent(JSON.stringify({ leftPct }))}; path=/; max-age=31536000; SameSite=Lax`
+      document.cookie = `${cookieKey}=${encodeURIComponent(JSON.stringify({ leftPct }))}; path=/; max-age=31536000; SameSite=Lax`
     }, 200)
     return () => clearTimeout(id)
-  }, [leftPct])
+  }, [cookieKey, leftPct])
 
   const startDrag = useCallback(() => {
     const container = containerRef.current
