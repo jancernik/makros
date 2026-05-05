@@ -1,7 +1,7 @@
 import { and, asc, desc, eq, getTableColumns, gte, lte } from "drizzle-orm"
 
 import { db } from "@/db"
-import { dailyTargets, dayPlans, foods } from "@/db/schema"
+import { dailyTargets, dayPlans, foods, weightEntries, weightTargets } from "@/db/schema"
 
 export async function getDayPlanByDate(date: string) {
   return db.query.dayPlans.findFirst({
@@ -52,4 +52,30 @@ export async function getRecentDayPlans(endDate: string, days = 30) {
       target: true
     }
   })
+}
+
+export async function getWeightEntries(days = 90) {
+  const start = new Date()
+  start.setDate(start.getDate() - days + 1)
+  const startDate = start.toISOString().split("T")[0]
+
+  return db
+    .select()
+    .from(weightEntries)
+    .where(gte(weightEntries.date, startDate))
+    .orderBy(asc(weightEntries.date))
+}
+
+export async function getWeightEntryByDate(date: string) {
+  const [entry] = await db.select().from(weightEntries).where(eq(weightEntries.date, date)).limit(1)
+  return entry ?? null
+}
+
+export async function getWeightTargetById(id: string) {
+  const [target] = await db.select().from(weightTargets).where(eq(weightTargets.id, id)).limit(1)
+  return target ?? null
+}
+
+export async function getWeightTargets() {
+  return db.select().from(weightTargets).orderBy(asc(weightTargets.startDate))
 }

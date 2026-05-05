@@ -16,6 +16,7 @@ import {
 } from "drizzle-orm/pg-core"
 
 export const foodUnitEnum = pgEnum("food_unit", ["g", "ml", "unit"])
+export const weightTargetTypeEnum = pgEnum("weight_target_type", ["rate", "fixed"])
 
 export const foods = pgTable(
   "foods",
@@ -150,12 +151,45 @@ export const dayPlanItemsRelations = relations(dayPlanItems, ({ one }) => ({
   })
 }))
 
+export const weightEntries = pgTable(
+  "weight_entries",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    date: date("date", { mode: "string" }).notNull(),
+    weight: numeric("weight", { mode: "number", precision: 5, scale: 2 }).notNull(),
+    note: text("note"),
+    createdAt: timestamp("created_at", { mode: "date", withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { mode: "date", withTimezone: true }).defaultNow().notNull()
+  },
+  (table) => [
+    uniqueIndex("weight_entries_date_unique").on(table.date),
+    check("weight_entries_weight_positive", sql`${table.weight} > 0`)
+  ]
+)
+
+export const weightTargets = pgTable("weight_targets", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  type: weightTargetTypeEnum("type").notNull().default("fixed"),
+  startDate: date("start_date", { mode: "string" }),
+  endDate: date("end_date", { mode: "string" }),
+  startWeight: numeric("start_weight", { mode: "number", precision: 5, scale: 2 }),
+  minTargetRate: numeric("min_target_rate", { mode: "number", precision: 5, scale: 3 }),
+  maxTargetRate: numeric("max_target_rate", { mode: "number", precision: 5, scale: 3 }),
+  targetWeight: numeric("target_weight", { mode: "number", precision: 5, scale: 2 }),
+  createdAt: timestamp("created_at", { mode: "date", withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { mode: "date", withTimezone: true }).defaultNow().notNull()
+})
+
 export type DailyTarget = typeof dailyTargets.$inferSelect
 export type DayPlan = typeof dayPlans.$inferSelect
 export type DayPlanItem = typeof dayPlanItems.$inferSelect
 export type Food = typeof foods.$inferSelect
-
 export type NewDailyTarget = typeof dailyTargets.$inferInsert
 export type NewDayPlan = typeof dayPlans.$inferInsert
+
 export type NewDayPlanItem = typeof dayPlanItems.$inferInsert
 export type NewFood = typeof foods.$inferInsert
+export type NewWeightEntry = typeof weightEntries.$inferInsert
+export type NewWeightTarget = typeof weightTargets.$inferInsert
+export type WeightEntry = typeof weightEntries.$inferSelect
+export type WeightTarget = typeof weightTargets.$inferSelect

@@ -15,6 +15,13 @@
       "when": 1774227386609,
       "tag": "0001_rich_calypso",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1776801883292,
+      "tag": "0002_cloudy_longshot",
+      "breakpoints": true
     }
   ]
 }
