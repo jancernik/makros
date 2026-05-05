@@ -6,14 +6,7 @@ import { useTransition } from "react"
 import toast from "react-hot-toast"
 
 import { Button } from "../../components/ui/button"
-import {
-  Float,
-  FloatContent,
-  FloatItem,
-  FloatLink,
-  FloatSeparator,
-  FloatTrigger
-} from "../../components/ui/float"
+import { Float, FloatContent, FloatItem, FloatLink, FloatTrigger } from "../../components/ui/float"
 import { deleteFood, duplicateFood, setFoodHidden } from "../actions"
 
 type Props = {
@@ -92,8 +85,6 @@ export function FoodActionsMenu({ foodId, isHidden }: Props) {
             {isHidden ? <Eye size={13} /> : <EyeOff size={13} />}
             {isHidden ? "Unhide" : "Hide"}
           </FloatItem>
-
-          <FloatSeparator />
 
           <FloatItem
             className="flex items-center gap-2"
