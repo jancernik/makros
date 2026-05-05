@@ -1,6 +1,6 @@
 "use client"
 
-import { LogOut, PlusCircle, Ruler, Scale, SquarePen, TrendingUp } from "lucide-react"
+import { LogOut, PlusCircle, Ruler, SquarePen, TrendingUp, Weight } from "lucide-react"
 
 import type { DailyTarget, Food } from "@/db/schema"
 
@@ -63,7 +63,7 @@ export function FoodContent({
                 <PlusCircle size={15} /> New food
               </ButtonLink>
               <ButtonLink href="/weight" variant="primary">
-                <Scale size={15} /> Weight
+                <Weight size={15} /> Weight
               </ButtonLink>
               {authEnabled && (
                 <form action={logout}>
