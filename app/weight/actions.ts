@@ -23,8 +23,8 @@ const endDateField = z
 const rateTargetSchema = z.object({
   endDate: endDateField,
   id: z.string().uuid().optional(),
-  maxTargetRate: z.coerce.number().positive(),
-  minTargetRate: z.coerce.number().min(0),
+  maxTargetRate: z.coerce.number(),
+  minTargetRate: z.coerce.number(),
   startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   startWeight: z.coerce.number().positive(),
   type: z.literal("rate")

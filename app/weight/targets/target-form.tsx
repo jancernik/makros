@@ -68,7 +68,6 @@ export function TargetForm({ target }: { target?: null | WeightTarget }) {
             defaultValue={target?.minTargetRate ?? 0.25}
             id="minTargetRate"
             label="Min rate"
-            min="0"
             name="minTargetRate"
             step="0.05"
             type="number"
@@ -78,7 +77,6 @@ export function TargetForm({ target }: { target?: null | WeightTarget }) {
             defaultValue={target?.maxTargetRate ?? 0.5}
             id="maxTargetRate"
             label="Max rate"
-            min="0"
             name="maxTargetRate"
             step="0.05"
             type="number"
