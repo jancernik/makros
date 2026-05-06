@@ -3,6 +3,8 @@ import { ArrowLeft } from "lucide-react"
 import type { DayMacros } from "./history-client"
 
 import { ButtonLink } from "../../components/ui/button"
+
+export const dynamic = "force-dynamic"
 import { getRecentDayPlans } from "../queries"
 import { HistoryWrapper } from "./history-wrapper"
 
