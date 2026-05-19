@@ -1,5 +1,7 @@
 "use client"
 
+import { ClipboardList, UtensilsCrossed } from "lucide-react"
+
 import type { DailyTarget, Food } from "@/db/schema"
 
 import type { FoodsTableState, PanelsLayout, PlanTableState } from "../cookies"
@@ -32,6 +34,8 @@ export function FoodPanels({ allFoods, date, foodsState, panelsLayout, planState
           target={target}
         />
       }
+      leftIcon={<UtensilsCrossed size={18} />}
+      leftLabel="Foods"
       right={
         <DayPlanTable
           initialOrder={planState.order}
@@ -41,6 +45,8 @@ export function FoodPanels({ allFoods, date, foodsState, panelsLayout, planState
           target={target}
         />
       }
+      rightIcon={<ClipboardList size={18} />}
+      rightLabel="Today"
     />
   )
 }

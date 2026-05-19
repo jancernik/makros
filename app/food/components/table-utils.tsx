@@ -204,7 +204,7 @@ export function SortableRow<T extends { id: string }>({
             return (
               <td className={`px-0! w-px${dimmed ? " opacity-40" : ""}`} key={cell.id}>
                 <span
-                  className={`flex w-14 items-center justify-center ${canReorder ? "cursor-grab text-[#444] hover:text-[#777] active:cursor-grabbing" : "invisible pointer-events-none"}`}
+                  className={`flex w-9 items-center justify-center md:w-14 ${canReorder ? "cursor-grab text-[#444] hover:text-[#777] active:cursor-grabbing" : "invisible pointer-events-none"}`}
                   {...(canReorder
                     ? {
                         ...attributes,
@@ -280,13 +280,13 @@ export function TableToolbar<T>({
   title: string
 }) {
   return (
-    <div className="flex h-16 shrink-0 items-center gap-4 border-b border-[#1a1a1a] px-6">
-      <span className="text-[12px] font-semibold uppercase tracking-wider text-[#888]">
+    <div className="flex h-12 shrink-0 items-center gap-2 border-b border-[#1a1a1a] px-3 md:h-16 md:gap-4 md:px-6">
+      <span className="hidden md:inline text-[12px] font-semibold uppercase tracking-wider text-[#888]">
         {title}
       </span>
       <div className="relative">
         <Input
-          className={`w-40 md:w-56${globalFilter ? " [&_input]:pr-7" : ""}`}
+          className={`w-36 md:w-56${globalFilter ? " [&_input]:pr-7" : ""}`}
           icon={<Search size={14} />}
           iconPosition="left"
           onChange={(e) => onGlobalFilterChange(e.target.value)}
@@ -305,7 +305,7 @@ export function TableToolbar<T>({
           </button>
         )}
       </div>
-      <div className="ml-auto flex items-center gap-2">
+      <div className="ml-auto flex items-center gap-1.5 md:gap-2">
         <Button
           className={`gap-1.5 font-semibold uppercase tracking-wider ${showClearSort ? "" : "invisible pointer-events-none"}`}
           onClick={onClearSort}

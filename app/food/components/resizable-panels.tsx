@@ -1,5 +1,6 @@
 "use client"
 
+import { ClipboardList, UtensilsCrossed } from "lucide-react"
 import { useCallback, useEffect, useRef, useState } from "react"
 
 type Props = {
@@ -7,17 +8,28 @@ type Props = {
   cookieKey?: string
   defaultLeftPct?: number
   left: React.ReactNode
+  leftIcon?: React.ReactNode
+  leftLabel?: string
   right: React.ReactNode
+  rightIcon?: React.ReactNode
+  rightLabel?: string
 }
+
+type Tab = "left" | "right"
 
 export function ResizablePanels({
   className,
   cookieKey = "panels-layout",
   defaultLeftPct = 50,
   left,
-  right
+  leftIcon = <UtensilsCrossed size={18} />,
+  leftLabel = "Left",
+  right,
+  rightIcon = <ClipboardList size={18} />,
+  rightLabel = "Right"
 }: Props) {
   const [leftPct, setLeftPct] = useState(defaultLeftPct)
+  const [activeTab, setActiveTab] = useState<Tab>("left")
   const containerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -57,15 +69,23 @@ export function ResizablePanels({
     document.addEventListener("touchend", cleanup)
   }, [])
 
+  const tabs = [
+    { icon: leftIcon, label: leftLabel, tab: "left" as Tab },
+    { icon: rightIcon, label: rightLabel, tab: "right" as Tab }
+  ]
+
   return (
     <div
-      className={["flex flex-col md:min-h-0 md:flex-1 md:flex-row", className]
-        .filter(Boolean)
-        .join(" ")}
+      className={["flex min-h-0 flex-1 flex-col md:flex-row", className].filter(Boolean).join(" ")}
       ref={containerRef}
       style={{ "--panel-left-width": `${leftPct}%` } as React.CSSProperties}
     >
-      <div className="flex min-h-0 min-w-0 flex-col overflow-hidden border-b border-[#1a1a1a] md:border-b-0 panel-left">
+      <div
+        className={[
+          "min-h-0 min-w-0 flex-col overflow-hidden panel-left",
+          activeTab === "left" ? "flex flex-1 md:flex-none" : "hidden md:flex"
+        ].join(" ")}
+      >
         {left}
       </div>
 
@@ -77,7 +97,31 @@ export function ResizablePanels({
         <div className="mx-auto w-px bg-[#1a1a1a] transition-colors duration-100 group-hover:bg-[#444]" />
       </div>
 
-      <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">{right}</div>
+      <div
+        className={[
+          "min-h-0 min-w-0 flex-1 flex-col overflow-hidden",
+          activeTab === "right" ? "flex" : "hidden md:flex"
+        ].join(" ")}
+      >
+        {right}
+      </div>
+
+      <div className="flex shrink-0 border-t border-[#1a1a1a] md:hidden">
+        {tabs.map(({ icon, label, tab }) => (
+          <button
+            aria-pressed={activeTab === tab}
+            className={[
+              "flex flex-1 flex-col items-center gap-1 py-3 text-[11px] font-medium uppercase tracking-[0.08em] transition-colors duration-100",
+              activeTab === tab ? "text-(--text)" : "text-(--text-muted)"
+            ].join(" ")}
+            key={tab}
+            onClick={() => setActiveTab(tab)}
+          >
+            {icon}
+            {label}
+          </button>
+        ))}
+      </div>
     </div>
   )
 }

@@ -13,7 +13,7 @@ import {
 } from "chart.js"
 import "chartjs-adapter-date-fns"
 import ZoomPlugin from "chartjs-plugin-zoom"
-import { MoreHorizontal, Pencil, Trash2 } from "lucide-react"
+import { List, MoreHorizontal, Pencil, Target, Trash2 } from "lucide-react"
 import { useEffect, useMemo, useRef, useState, useTransition } from "react"
 import { Line } from "react-chartjs-2"
 
@@ -370,7 +370,11 @@ export function WeightClient({ defaultLeftPct = 50, entries, targets }: WeightCl
             onHighlightClear={() => setHighlightedDate(null)}
           />
         }
+        leftIcon={<List size={18} />}
+        leftLabel="Logs"
         right={<TargetsPanel targets={targets} />}
+        rightIcon={<Target size={18} />}
+        rightLabel="Targets"
       />
     </>
   )
@@ -440,7 +444,7 @@ function LogRow({
   return (
     <div
       className={[
-        "group flex items-center justify-between gap-4 border-b pl-4 py-3 transition-colors duration-500 border-[#1a1a1a]",
+        "group flex items-center justify-between gap-4 border-b border-[#1a1a1a] pl-4 py-3 transition-colors duration-500",
         highlighted ? "bg-[#111]" : ""
       ].join(" ")}
       ref={rowRef}
@@ -498,9 +502,6 @@ function LogsPanel({
 }) {
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      <div className="flex h-12 shrink-0 items-center border-b border-[#1a1a1a] px-6">
-        <span className="text-[12px] font-semibold uppercase tracking-wider text-[#888]">Logs</span>
-      </div>
       {entries.length === 0 ? (
         <div className="flex flex-1 items-center justify-center">
           <p className="text-sm text-[#555]">No entries yet.</p>
@@ -588,11 +589,6 @@ function TargetRow({ target }: { target: WeightTarget }) {
 function TargetsPanel({ targets }: { targets: WeightTarget[] }) {
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      <div className="flex h-12 shrink-0 items-center border-b border-[#1a1a1a] px-6">
-        <span className="text-[12px] font-semibold uppercase tracking-wider text-[#888]">
-          Targets
-        </span>
-      </div>
       <div className="min-h-0 flex-1 overflow-auto">
         {targets.length === 0 ? (
           <div className="flex flex-1 items-center justify-center h-full">
