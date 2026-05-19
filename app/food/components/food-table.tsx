@@ -387,7 +387,7 @@ export function FoodsTable({
             onPressedChange={setShowHidden}
             pressed={showHidden}
           >
-            Hidden
+            <span className="hidden md:inline">Hidden</span>
           </Toggle>
         }
         showClearSort={sorting.length > 0}
@@ -402,7 +402,7 @@ export function FoodsTable({
           searching={!!globalFilter}
         />
       ) : (
-        <div className="min-h-0 flex-1 overflow-auto [&_td]:px-6 [&_th]:px-6">
+        <div className="min-h-0 flex-1 overflow-auto [&_td]:px-3 [&_th]:px-3 md:[&_td]:px-6 md:[&_th]:px-6">
           <DndContext
             collisionDetection={collisionDetection}
             id="foods-dnd"

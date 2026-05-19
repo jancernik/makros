@@ -14,7 +14,7 @@ export default async function EditTargetPage({ params }: Props) {
 
   return (
     <main className="min-h-dvh">
-      <header className="relative flex items-center border-b border-[#1a1a1a] px-6 py-5">
+      <header className="relative flex items-center border-b border-[#1a1a1a] px-4 py-3 md:px-6 md:py-5">
         <ButtonLink href="/weight" variant="secondary">
           <ArrowLeft size={14} /> Back
         </ButtonLink>

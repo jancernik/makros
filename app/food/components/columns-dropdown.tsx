@@ -30,7 +30,7 @@ export function ColumnsDropdown<TData>({
       <FloatTrigger>
         <Button className="font-semibold uppercase tracking-wider" size="sm" type="button">
           <Columns2 size={13} />
-          {buttonLabel}
+          <span className="hidden md:inline">{buttonLabel}</span>
         </Button>
       </FloatTrigger>
 
