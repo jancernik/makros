@@ -360,7 +360,7 @@ export function WeightClient({ defaultLeftPct = 50, entries, targets }: WeightCl
       </div>
 
       <ResizablePanels
-        className="mx-auto w-full max-w-4xl border-x border-[#1a1a1a]"
+        className="mx-auto w-full max-w-4xl md:border-x md:border-[#1a1a1a]"
         cookieKey="weight-panels-layout"
         defaultLeftPct={defaultLeftPct}
         left={
