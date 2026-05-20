@@ -16,8 +16,6 @@ This project is meant to stay simple and flexible. It doesn't force you into a s
 
 **Demo:** [demo.makros.cuasar.cc](https://demo.makros.cuasar.cc) — resets daily with sample food and weight data, no login required.
 
-> I use this almost exclusively on desktop and haven't really bothered making it look good on mobile. Maybe someday. No promises.
-
 ---
 
 ## Features
