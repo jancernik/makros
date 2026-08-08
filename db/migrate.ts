@@ -6,14 +6,7 @@ import { Client } from "pg"
 import { dbEnv } from "./env"
 
 async function migrateDb() {
-  const client = new Client({
-    database: dbEnv.name,
-    host: dbEnv.host,
-    password: dbEnv.password,
-    port: dbEnv.port,
-    ssl: dbEnv.ssl,
-    user: dbEnv.user
-  })
+  const client = new Client({ connectionString: dbEnv.migrationUrl })
 
   try {
     await client.connect()

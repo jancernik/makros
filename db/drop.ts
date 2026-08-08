@@ -2,7 +2,7 @@ import "dotenv/config"
 import { Client } from "pg"
 import readline from "readline"
 
-import { dbEnv } from "./env"
+import { adminUrl, databaseName } from "./env"
 
 function askConfirmation(question: string): Promise<boolean> {
   return new Promise((resolve) => {
@@ -15,11 +15,12 @@ function askConfirmation(question: string): Promise<boolean> {
 }
 
 async function dropDatabase() {
+  const name = databaseName()
   const force = process.argv.includes("--force") || process.argv.includes("-y")
 
   if (!force) {
     const confirmed = await askConfirmation(
-      `Are you sure you want to drop the database "${dbEnv.name}"? (y/N): `
+      `Are you sure you want to drop the database "${name}"? (y/N): `
     )
 
     if (!confirmed) {
@@ -28,26 +29,17 @@ async function dropDatabase() {
     }
   }
 
-  const adminClient = new Client({
-    database: "postgres",
-    host: dbEnv.host,
-    password: dbEnv.password,
-    port: dbEnv.port,
-    ssl: dbEnv.ssl,
-    user: dbEnv.user
-  })
+  const adminClient = new Client({ connectionString: adminUrl() })
   await adminClient.connect()
 
   try {
-    const result = await adminClient.query("SELECT 1 FROM pg_database WHERE datname = $1", [
-      dbEnv.name
-    ])
+    const result = await adminClient.query("SELECT 1 FROM pg_database WHERE datname = $1", [name])
 
     if (result.rowCount === 0) {
-      console.error(`✗ Database ${dbEnv.name} does not exist`)
+      console.error(`✗ Database ${name} does not exist`)
     } else {
-      await adminClient.query(`DROP DATABASE "${dbEnv.name}"`)
-      console.log(`✓ Database ${dbEnv.name} dropped`)
+      await adminClient.query(`DROP DATABASE "${name}"`)
+      console.log(`✓ Database ${name} dropped`)
     }
   } catch (error) {
     console.error(`✗ Error dropping database: ${(error as Error).message}`)
