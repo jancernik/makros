@@ -1,7 +1,7 @@
 import "dotenv/config"
 import readline from "readline"
 
-import { truncateAllTables } from "./seed/lib"
+import { truncateAllTables } from "./seed/truncate"
 
 function askConfirmation(question: string): Promise<boolean> {
   return new Promise((resolve) => {

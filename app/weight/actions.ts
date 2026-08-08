@@ -1,11 +1,13 @@
 "use server"
 
-import { eq } from "drizzle-orm"
+import { and, eq } from "drizzle-orm"
 import { revalidatePath } from "next/cache"
 import { z } from "zod"
 
 import { db } from "@/db"
 import { weightEntries, weightTargets } from "@/db/schema"
+
+import { requireUserId } from "../auth/lib"
 
 const logSchema = z.object({
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
@@ -45,16 +47,23 @@ const fixedTargetSchema = z.object({
 const targetSchema = z.discriminatedUnion("type", [rateTargetSchema, fixedTargetSchema])
 
 export async function deleteWeightEntryByDate(date: string) {
-  await db.delete(weightEntries).where(eq(weightEntries.date, date))
+  const userId = await requireUserId()
+  await db
+    .delete(weightEntries)
+    .where(and(eq(weightEntries.userId, userId), eq(weightEntries.date, date)))
   revalidatePath("/weight")
 }
 
 export async function deleteWeightTargetById(id: string) {
-  await db.delete(weightTargets).where(eq(weightTargets.id, id))
+  const userId = await requireUserId()
+  await db
+    .delete(weightTargets)
+    .where(and(eq(weightTargets.userId, userId), eq(weightTargets.id, id)))
   revalidatePath("/weight")
 }
 
 export async function saveWeightTarget(_: unknown, formData: FormData) {
+  const userId = await requireUserId()
   const raw = {
     endDate: (formData.get("endDate") as string) || null,
     id: formData.get("id") || undefined,
@@ -74,12 +83,17 @@ export async function saveWeightTarget(_: unknown, formData: FormData) {
   const { id, ...values } = parsed.data
 
   if (id) {
-    await db
+    const updated = await db
       .update(weightTargets)
       .set({ ...values, updatedAt: new Date() })
-      .where(eq(weightTargets.id, id))
+      .where(and(eq(weightTargets.userId, userId), eq(weightTargets.id, id)))
+      .returning({ id: weightTargets.id })
+
+    if (updated.length === 0) {
+      return { error: "Target not found", success: false }
+    }
   } else {
-    await db.insert(weightTargets).values(values)
+    await db.insert(weightTargets).values({ ...values, userId })
   }
 
   revalidatePath("/weight")
@@ -87,6 +101,7 @@ export async function saveWeightTarget(_: unknown, formData: FormData) {
 }
 
 export async function upsertWeightEntry(_: unknown, formData: FormData) {
+  const userId = await requireUserId()
   const parsed = logSchema.safeParse({
     date: formData.get("date"),
     note: formData.get("note") || undefined,
@@ -105,7 +120,7 @@ export async function upsertWeightEntry(_: unknown, formData: FormData) {
     const [existing] = await db
       .select({ date: weightEntries.date })
       .from(weightEntries)
-      .where(eq(weightEntries.date, date))
+      .where(and(eq(weightEntries.userId, userId), eq(weightEntries.date, date)))
       .limit(1)
     if (existing) {
       return { error: `A log entry for ${date} already exists`, success: false }
@@ -113,17 +128,22 @@ export async function upsertWeightEntry(_: unknown, formData: FormData) {
   }
 
   if (originalDate && dateChanged) {
-    await db
+    const updated = await db
       .update(weightEntries)
       .set({ date, note: note ?? null, updatedAt: new Date(), weight })
-      .where(eq(weightEntries.date, originalDate))
+      .where(and(eq(weightEntries.userId, userId), eq(weightEntries.date, originalDate)))
+      .returning({ id: weightEntries.id })
+
+    if (updated.length === 0) {
+      return { error: "Log entry not found", success: false }
+    }
   } else {
     await db
       .insert(weightEntries)
-      .values({ date, note: note ?? null, weight })
+      .values({ date, note: note ?? null, userId, weight })
       .onConflictDoUpdate({
         set: { note: note ?? null, updatedAt: new Date(), weight },
-        target: weightEntries.date
+        target: [weightEntries.userId, weightEntries.date]
       })
   }
 

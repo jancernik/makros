@@ -24,7 +24,6 @@ import { SaveIcon } from "./save-icon"
 
 type Props = {
   allFoods: Food[]
-  authEnabled: boolean
   date: string
   foodsState: FoodsTableState
   panelsLayout: PanelsLayout
@@ -36,7 +35,6 @@ type Props = {
 
 export function FoodContent({
   allFoods,
-  authEnabled,
   date,
   foodsState,
   panelsLayout,
@@ -76,13 +74,11 @@ export function FoodContent({
                 <ButtonLink href="/food/new">
                   <PlusCircle size={15} /> New food
                 </ButtonLink>
-                {authEnabled && (
-                  <form action={logout}>
-                    <Button type="submit" variant="danger">
-                      <LogOut size={15} /> Logout
-                    </Button>
-                  </form>
-                )}
+                <form action={logout}>
+                  <Button type="submit" variant="danger">
+                    <LogOut size={15} /> Logout
+                  </Button>
+                </form>
               </div>
 
               <MobileNav>
@@ -99,16 +95,12 @@ export function FoodContent({
                 <MobileNavLink href="/food/new">
                   <PlusCircle size={14} /> New food
                 </MobileNavLink>
-                {authEnabled && (
-                  <>
-                    <MobileNavSeparator />
-                    <form action={logout}>
-                      <MobileNavButton className="text-red-400" type="submit">
-                        <LogOut size={14} /> Logout
-                      </MobileNavButton>
-                    </form>
-                  </>
-                )}
+                <MobileNavSeparator />
+                <form action={logout}>
+                  <MobileNavButton className="text-red-400" type="submit">
+                    <LogOut size={14} /> Logout
+                  </MobileNavButton>
+                </form>
               </MobileNav>
             </div>
           </header>

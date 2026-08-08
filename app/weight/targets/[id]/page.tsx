@@ -1,6 +1,7 @@
 import { ArrowLeft } from "lucide-react"
 import { notFound } from "next/navigation"
 
+import { requireUserIdOrRedirect } from "../../../auth/lib"
 import { ButtonLink } from "../../../components/ui/button"
 import { getWeightTargetById } from "../../../food/queries"
 import { TargetForm } from "../target-form"
@@ -8,8 +9,9 @@ import { TargetForm } from "../target-form"
 type Props = { params: Promise<{ id: string }> }
 
 export default async function EditTargetPage({ params }: Props) {
+  const userId = await requireUserIdOrRedirect()
   const { id } = await params
-  const target = await getWeightTargetById(id)
+  const target = await getWeightTargetById(userId, id)
   if (!target) notFound()
 
   return (

@@ -15,13 +15,12 @@ import { Button, ButtonLink } from "../components/ui/button"
 import { WeightWrapper } from "./weight-wrapper"
 
 type Props = {
-  authEnabled: boolean
   defaultLeftPct: number
   entries: WeightEntry[]
   targets: WeightTarget[]
 }
 
-export function WeightContent({ authEnabled, defaultLeftPct, entries, targets }: Props) {
+export function WeightContent({ defaultLeftPct, entries, targets }: Props) {
   return (
     <main className="flex h-dvh flex-col overflow-hidden">
       <header className="flex shrink-0 items-center justify-between border-b border-[#1a1a1a] px-4 py-3 md:px-6 md:py-5">
@@ -37,13 +36,11 @@ export function WeightContent({ authEnabled, defaultLeftPct, entries, targets }:
             <ButtonLink href="/weight/log">
               <PlusCircle size={15} /> Log weight
             </ButtonLink>
-            {authEnabled && (
-              <form action={logout}>
-                <Button type="submit" variant="danger">
-                  <LogOut size={15} /> Logout
-                </Button>
-              </form>
-            )}
+            <form action={logout}>
+              <Button type="submit" variant="danger">
+                <LogOut size={15} /> Logout
+              </Button>
+            </form>
           </div>
           <MobileNav>
             <MobileNavLink href="/weight/targets/new">
@@ -52,16 +49,12 @@ export function WeightContent({ authEnabled, defaultLeftPct, entries, targets }:
             <MobileNavLink href="/weight/log">
               <PlusCircle size={14} /> Log weight
             </MobileNavLink>
-            {authEnabled && (
-              <>
-                <MobileNavSeparator />
-                <form action={logout}>
-                  <MobileNavButton className="text-red-400" type="submit">
-                    <LogOut size={14} /> Logout
-                  </MobileNavButton>
-                </form>
-              </>
-            )}
+            <MobileNavSeparator />
+            <form action={logout}>
+              <MobileNavButton className="text-red-400" type="submit">
+                <LogOut size={14} /> Logout
+              </MobileNavButton>
+            </form>
           </MobileNav>
         </div>
       </header>

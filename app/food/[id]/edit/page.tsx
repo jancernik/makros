@@ -1,6 +1,7 @@
 import { ArrowLeft } from "lucide-react"
 import { notFound } from "next/navigation"
 
+import { requireUserIdOrRedirect } from "../../../auth/lib"
 import { ButtonLink } from "../../../components/ui/button"
 import { FoodForm } from "../../components/food-form"
 import { getFoodById } from "../../queries"
@@ -10,8 +11,9 @@ type Props = {
 }
 
 export default async function EditFoodPage({ params }: Props) {
+  const userId = await requireUserIdOrRedirect()
   const { id } = await params
-  const food = await getFoodById(id)
+  const food = await getFoodById(userId, id)
 
   if (!food) notFound()
 

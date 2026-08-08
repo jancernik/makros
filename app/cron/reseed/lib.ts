@@ -2,7 +2,8 @@ import "server-only"
 import { sql } from "drizzle-orm"
 
 import { db } from "@/db"
-import { seedDatabase, truncateAllTables } from "@/db/seed/lib"
+import { seedDatabase } from "@/db/seed/lib"
+import { truncateAllTables } from "@/db/seed/truncate"
 
 export async function resetAndSeedDemoDatabase() {
   await assertSafeTarget()

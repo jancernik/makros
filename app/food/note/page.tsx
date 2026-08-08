@@ -1,5 +1,6 @@
 import { ArrowLeft } from "lucide-react"
 
+import { requireUserIdOrRedirect } from "../../auth/lib"
 import { ButtonLink } from "../../components/ui/button"
 import { getDayPlanByDate } from "../queries"
 import { SetNoteForm } from "./set-note-form"
@@ -9,11 +10,12 @@ type Props = {
 }
 
 export default async function NotePage({ searchParams }: Props) {
+  const userId = await requireUserIdOrRedirect()
   const { date } = await searchParams
   const today = new Date().toISOString().split("T")[0]
   const selectedDate = date ?? today
 
-  const plan = await getDayPlanByDate(selectedDate)
+  const plan = await getDayPlanByDate(userId, selectedDate)
   const formattedDate = new Intl.DateTimeFormat("en-US", {
     day: "numeric",
     month: "long",

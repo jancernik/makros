@@ -1,5 +1,6 @@
 import { ArrowLeft } from "lucide-react"
 
+import { requireUserIdOrRedirect } from "../../auth/lib"
 import { ButtonLink } from "../../components/ui/button"
 import { getDayPlanByDate, getMostRecentTarget } from "../queries"
 import { SetTargetsForm } from "./set-targets-form"
@@ -9,12 +10,13 @@ type Props = {
 }
 
 export default async function TargetsPage({ searchParams }: Props) {
+  const userId = await requireUserIdOrRedirect()
   const { date } = await searchParams
   const today = new Date().toISOString().split("T")[0]
   const selectedDate = date ?? today
 
-  const plan = await getDayPlanByDate(selectedDate)
-  const target = plan?.target ?? (await getMostRecentTarget(selectedDate))
+  const plan = await getDayPlanByDate(userId, selectedDate)
+  const target = plan?.target ?? (await getMostRecentTarget(userId, selectedDate))
   const formattedDate = new Intl.DateTimeFormat("en-US", {
     day: "numeric",
     month: "long",
