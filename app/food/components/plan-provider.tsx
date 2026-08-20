@@ -22,7 +22,7 @@ type AmountOverride = { amount: number; consumedAmount: number }
 type Plan = Awaited<ReturnType<typeof getDayPlanByDate>>
 
 type PlanContextValue = {
-  addPendingItem: (item: PlanItem) => void
+  addPendingItem: (item: PlanItem) => boolean
   amounts: Record<string, AmountOverride>
   baseItems: PlanItem[]
   cancelPendingItem: (itemId: string) => void
@@ -60,6 +60,7 @@ export function PlanProvider({
   const [pendingItems, setPendingItems] = useState<PlanItem[]>([])
   const inFlightIds = useRef<Set<string>>(new Set())
   const cancelledPendingIds = useRef<Set<string>>(new Set())
+  const planFoodIdsRef = useRef<Set<string>>(new Set())
   const amountsRef = useRef(amounts)
   useEffect(() => {
     amountsRef.current = amounts
@@ -147,8 +148,11 @@ export function PlanProvider({
   }, [])
 
   const addPendingItem = useCallback((item: PlanItem) => {
+    if (planFoodIdsRef.current.has(item.foodId)) return false
+    planFoodIdsRef.current.add(item.foodId)
     inFlightIds.current.add(item.id)
     setPendingItems((prev) => [...prev, item])
+    return true
   }, [])
 
   const cancelPendingItem = useCallback(
@@ -197,6 +201,9 @@ export function PlanProvider({
       ]),
     [baseItems, removedIds, pendingItems]
   )
+  useEffect(() => {
+    planFoodIdsRef.current = new Set(planFoodIds)
+  })
 
   return (
     <PlanContext.Provider

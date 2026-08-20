@@ -82,6 +82,8 @@ const FIXED_END = ["actions"]
 const FIXED_COLS = new Set([...FIXED_START, ...FIXED_END])
 const MIDDLE_COLS = ["amount", "name", "calories", "protein", "fat", "carbohydrates", "notes"]
 
+let pendingSeq = 0
+
 type FoodsTableProps = {
   allFoods: Food[]
   date: string
@@ -459,9 +461,9 @@ function AddButtonCell({ amount, date, food }: { amount: number; date: string; f
     <Button
       iconOnly
       onClick={() => {
-        const tempId = `pending-${food.id}`
+        const tempId = `pending-${food.id}-${++pendingSeq}`
         const now = new Date()
-        addPendingItem({
+        const added = addPendingItem({
           amount,
           consumedAmount: 0,
           createdAt: now,
@@ -472,6 +474,7 @@ function AddButtonCell({ amount, date, food }: { amount: number; date: string; f
           position: 0,
           updatedAt: now
         } as PlanItem)
+        if (!added) return
         trackSave(() =>
           addFoodToPlan(food.id, date, amount).then((result) => {
             if (result) {
