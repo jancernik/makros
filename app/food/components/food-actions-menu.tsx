@@ -10,11 +10,12 @@ import { Float, FloatContent, FloatItem, FloatLink, FloatTrigger } from "../../c
 import { deleteFood, duplicateFood, setFoodHidden } from "../actions"
 
 type Props = {
+  deletable?: boolean
   foodId: string
   isHidden: boolean
 }
 
-export function FoodActionsMenu({ foodId, isHidden }: Props) {
+export function FoodActionsMenu({ deletable = true, foodId, isHidden }: Props) {
   const [isPending, startTransition] = useTransition()
   const router = useRouter()
 
@@ -86,14 +87,16 @@ export function FoodActionsMenu({ foodId, isHidden }: Props) {
             {isHidden ? "Unhide" : "Hide"}
           </FloatItem>
 
-          <FloatItem
-            className="flex items-center gap-2"
-            danger
-            disabled={isPending}
-            onClick={handleDelete}
-          >
-            <Trash2 size={13} /> Delete
-          </FloatItem>
+          {deletable && (
+            <FloatItem
+              className="flex items-center gap-2"
+              danger
+              disabled={isPending}
+              onClick={handleDelete}
+            >
+              <Trash2 size={13} /> Delete
+            </FloatItem>
+          )}
         </FloatContent>
       </Float>
     </div>

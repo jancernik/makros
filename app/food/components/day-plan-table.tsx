@@ -31,6 +31,7 @@ import type { DailyTarget } from "@/db/schema"
 import { Button } from "../../components/ui/button"
 import { Toggle } from "../../components/ui/toggle"
 import { removePlanItem, reorderPlanItems } from "../actions"
+import { FoodActionsMenu } from "./food-actions-menu"
 import { PlanAmountInputs } from "./plan-amount-inputs"
 import { type PlanItem, usePlan } from "./plan-provider"
 import {
@@ -71,11 +72,12 @@ export const PLAN_TABLE_DEFAULT_ORDER = [
   "protein",
   "fat",
   "carbohydrates",
-  "notes"
+  "notes",
+  "actions"
 ]
 
 const FIXED_START = ["handle", "delete"]
-const FIXED_END: string[] = []
+const FIXED_END = ["actions"]
 const FIXED_COLS = new Set([...FIXED_START, ...FIXED_END])
 const MIDDLE_COLS = ["amounts", "name", "calories", "protein", "fat", "carbohydrates", "notes"]
 
@@ -117,7 +119,7 @@ export function DayPlanTable({
   const [columnVisibility, setColumnVisibility] =
     useState<Record<string, boolean>>(initialVisibility)
   const [columnOrder, setColumnOrder] = useState<string[]>(() =>
-    normalizeColumnOrder(initialOrder, MIDDLE_COLS, FIXED_START)
+    normalizeColumnOrder(initialOrder, MIDDLE_COLS, FIXED_START, FIXED_END)
   )
 
   const [showConsumed, setShowConsumed] = useState(initialShowConsumed)
@@ -292,6 +294,20 @@ export function DayPlanTable({
         enableSorting: false,
         header: "Notes",
         id: "notes"
+      },
+      {
+        cell: ({ row }) => (
+          <FoodActionsMenu
+            deletable={false}
+            foodId={row.original.foodId}
+            isHidden={row.original.food.hidden}
+          />
+        ),
+        enableHiding: false,
+        enableSorting: false,
+        header: "",
+        id: "actions",
+        meta: { shrink: true }
       }
     ],
     [target]
@@ -344,7 +360,8 @@ export function DayPlanTable({
           return normalizeColumnOrder(
             arrayMove(order, oldIndex, newIndex),
             MIDDLE_COLS,
-            FIXED_START
+            FIXED_START,
+            FIXED_END
           )
         })
       } else if (type === "row") {
