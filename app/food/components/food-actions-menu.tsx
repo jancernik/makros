@@ -1,6 +1,7 @@
 "use client"
 
 import { Copy, Eye, EyeOff, MoreHorizontal, Pencil, Trash2 } from "lucide-react"
+import { useSearchParams } from "next/navigation"
 import { useRouter } from "nextjs-toploader/app"
 import { useTransition } from "react"
 import toast from "react-hot-toast"
@@ -18,6 +19,8 @@ type Props = {
 export function FoodActionsMenu({ deletable = true, foodId, isHidden }: Props) {
   const [isPending, startTransition] = useTransition()
   const router = useRouter()
+  const date = useSearchParams().get("date")
+  const dateQuery = date ? `?date=${encodeURIComponent(date)}` : ""
 
   function handleDuplicate() {
     startTransition(async () => {
@@ -27,7 +30,7 @@ export function FoodActionsMenu({ deletable = true, foodId, isHidden }: Props) {
         return
       }
       toast.success("Food duplicated")
-      router.push(`/food/${result.id}/edit`)
+      router.push(`/food/${result.id}/edit${dateQuery}`)
     })
   }
 
@@ -66,7 +69,7 @@ export function FoodActionsMenu({ deletable = true, foodId, isHidden }: Props) {
         </FloatTrigger>
 
         <FloatContent align="center" className="min-w-35" estimatedWidth={140}>
-          <FloatLink className="flex items-center gap-2" href={`/food/${foodId}/edit`}>
+          <FloatLink className="flex items-center gap-2" href={`/food/${foodId}/edit${dateQuery}`}>
             <Pencil size={13} /> Edit
           </FloatLink>
 

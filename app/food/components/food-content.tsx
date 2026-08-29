@@ -43,6 +43,8 @@ export function FoodContent({
   target,
   today
 }: Props) {
+  const dateQuery = date === today ? "" : `?date=${date}`
+
   return (
     <PlanProvider date={date} plan={plan}>
       <NavProvider>
@@ -71,7 +73,7 @@ export function FoodContent({
                 <ButtonLink href={`/food/note?date=${date}`}>
                   <SquarePen size={15} /> Note
                 </ButtonLink>
-                <ButtonLink href="/food/new">
+                <ButtonLink href={`/food/new${dateQuery}`}>
                   <PlusCircle size={15} /> New food
                 </ButtonLink>
                 <form action={logout}>
@@ -92,7 +94,7 @@ export function FoodContent({
                 <MobileNavLink href={`/food/note?date=${date}`}>
                   <SquarePen size={14} /> Note
                 </MobileNavLink>
-                <MobileNavLink href="/food/new">
+                <MobileNavLink href={`/food/new${dateQuery}`}>
                   <PlusCircle size={14} /> New food
                 </MobileNavLink>
                 <MobileNavSeparator />

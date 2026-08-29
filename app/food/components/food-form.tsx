@@ -14,6 +14,7 @@ import { createFood, updateFood } from "../actions"
 
 type Props = {
   food?: Food
+  returnTo?: string
 }
 
 const initialState: FoodActionState = {
@@ -28,15 +29,15 @@ const UNIT_OPTIONS = [
   { label: "units", value: "unit" }
 ]
 
-export function FoodForm({ food }: Props) {
+export function FoodForm({ food, returnTo = "/food" }: Props) {
   const router = useRouter()
   const action = food ? updateFood.bind(null, food.id) : createFood
   const [state, formAction] = useActionState(action, initialState)
   const [unit, setUnit] = useState<string>(state.fields?.unit ?? food?.unit ?? "g")
 
   useEffect(() => {
-    if (state.success) router.push("/food")
-  }, [state.success, router])
+    if (state.success) router.push(returnTo)
+  }, [state.success, returnTo, router])
 
   return (
     <form action={formAction} className="flex flex-col gap-6">
