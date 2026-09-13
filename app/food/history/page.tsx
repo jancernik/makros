@@ -2,6 +2,7 @@ import { ArrowLeft } from "lucide-react"
 
 import type { DayMacros } from "./history-client"
 
+import { requireUserIdOrRedirect } from "../../auth/lib"
 import { ButtonLink } from "../../components/ui/button"
 import { getRecentDayPlans } from "../queries"
 import { HistoryWrapper } from "./history-wrapper"
@@ -9,8 +10,9 @@ import { HistoryWrapper } from "./history-wrapper"
 export const dynamic = "force-dynamic"
 
 export default async function HistoryPage() {
+  const userId = await requireUserIdOrRedirect()
   const today = new Date().toISOString().split("T")[0]
-  const plans = await getRecentDayPlans(today, 90)
+  const plans = await getRecentDayPlans(userId, today, 90)
 
   const data: DayMacros[] = plans.map((p) => ({
     consumed: p.items.reduce(

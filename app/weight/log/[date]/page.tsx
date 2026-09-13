@@ -1,6 +1,7 @@
 import { ArrowLeft } from "lucide-react"
 import { notFound } from "next/navigation"
 
+import { requireUserIdOrRedirect } from "../../../auth/lib"
 import { ButtonLink } from "../../../components/ui/button"
 import { getWeightEntryByDate } from "../../../food/queries"
 import { LogWeightForm } from "../log-form"
@@ -8,8 +9,9 @@ import { LogWeightForm } from "../log-form"
 type Props = { params: Promise<{ date: string }> }
 
 export default async function EditLogPage({ params }: Props) {
+  const userId = await requireUserIdOrRedirect()
   const { date } = await params
-  const entry = await getWeightEntryByDate(date)
+  const entry = await getWeightEntryByDate(userId, date)
   if (!entry) notFound()
 
   return (

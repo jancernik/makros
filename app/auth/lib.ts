@@ -1,18 +1,20 @@
 import "server-only"
-import { jwtVerify, SignJWT } from "jose"
+import { eq, sql } from "drizzle-orm"
+import { SignJWT } from "jose"
 import { cookies } from "next/headers"
+import { redirect } from "next/navigation"
+
+import { db } from "@/db"
+import { users } from "@/db/schema"
 
 import { SESSION_COOKIE_NAME } from "./constants"
+import { TIMING_DECOY_HASH, verifyPassword } from "./password"
+import { getSecretKey, getUserIdFromSessionToken } from "./token"
+
 const SESSION_DURATION_SECONDS = 60 * 60 * 24 * 30 // 30 days
 
-export function areCredentialsValid(username: string, password: string) {
-  const config = getAuthConfig()
-
-  if (!config.enabled) {
-    return true
-  }
-
-  return username === config.username && password === config.password
+export function areSignupsEnabled() {
+  return process.env.ALLOW_SIGNUPS === "true"
 }
 
 export async function clearSessionCookie() {
@@ -27,50 +29,35 @@ export async function clearSessionCookie() {
   })
 }
 
-export async function createSessionToken() {
+export async function createSessionToken(userId: string) {
   const secretKey = getSecretKey()
 
-  return new SignJWT({ role: "admin" })
+  return new SignJWT({})
     .setProtectedHeader({ alg: "HS256" })
+    .setSubject(userId)
     .setIssuedAt()
     .setExpirationTime(`${SESSION_DURATION_SECONDS}s`)
     .sign(secretKey)
 }
 
-export async function getSessionFromCookies() {
-  if (!isAuthEnabled()) {
-    return { authEnabled: false as const, authenticated: false }
-  }
-
+export async function getSessionUserId(): Promise<null | string> {
   const cookieStore = await cookies()
   const token = cookieStore.get(SESSION_COOKIE_NAME)?.value
+  if (!token) return null
 
-  if (!token) {
-    return { authEnabled: true as const, authenticated: false }
-  }
-
-  const payload = await verifySessionToken(token)
-
-  if (!payload) {
-    return { authEnabled: true as const, authenticated: false }
-  }
-
-  return {
-    authEnabled: true as const,
-    authenticated: true,
-    payload
-  }
+  return getUserIdFromSessionToken(token)
 }
 
-export function isAuthEnabled() {
-  return getAuthConfig().enabled
+export async function requireUserId(): Promise<string> {
+  const userId = await getSessionUserId()
+  if (!userId) throw new Error("Unauthorized")
+  return userId
 }
 
-export async function requireAuth() {
-  const session = await getSessionFromCookies()
-  if (session.authEnabled && !session.authenticated) {
-    throw new Error("Unauthorized")
-  }
+export async function requireUserIdOrRedirect(): Promise<string> {
+  const userId = await getSessionUserId()
+  if (!userId) redirect("/login")
+  return userId
 }
 
 export async function setSessionCookie(token: string) {
@@ -85,40 +72,14 @@ export async function setSessionCookie(token: string) {
   })
 }
 
-export async function verifySessionToken(token: string) {
-  try {
-    const secretKey = getSecretKey()
-    const result = await jwtVerify(token, secretKey, {
-      algorithms: ["HS256"]
-    })
+export async function verifyCredentials(username: string, password: string) {
+  const [user] = await db
+    .select()
+    .from(users)
+    .where(eq(sql`lower(${users.username})`, username.trim().toLowerCase()))
+    .limit(1)
 
-    return result.payload
-  } catch {
-    return null
-  }
-}
+  const valid = await verifyPassword(password, user?.passwordHash ?? TIMING_DECOY_HASH)
 
-function getAuthConfig() {
-  const username = process.env.AUTH_USERNAME
-  const password = process.env.AUTH_PASSWORD
-  const secret = process.env.AUTH_SECRET
-
-  const enabled = Boolean(username && password)
-
-  return {
-    enabled,
-    password,
-    secret,
-    username
-  }
-}
-
-function getSecretKey() {
-  const { secret } = getAuthConfig()
-
-  if (!secret) {
-    throw new Error("AUTH_SECRET is required when auth is enabled")
-  }
-
-  return new TextEncoder().encode(secret)
+  return valid && user ? user : null
 }

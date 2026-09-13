@@ -22,6 +22,20 @@
       "when": 1776801883292,
       "tag": "0002_cloudy_longshot",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1789236455174,
+      "tag": "0003_lowly_timeslip",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1789236536720,
+      "tag": "0004_tranquil_guardian",
+      "breakpoints": true
     }
   ]
 }

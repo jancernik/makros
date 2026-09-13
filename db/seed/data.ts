@@ -1,14 +1,30 @@
+import type { Table } from "drizzle-orm"
+
 import { randomUUID } from "crypto"
 
+import { hashPassword } from "../../app/auth/password"
 import {
   dailyTargets,
   dayPlanItems,
   dayPlans,
   foods,
+  users,
   weightEntries,
   weightTargets
 } from "../schema"
 import { defineSeed } from "./lib"
+
+// A stable id keeps outstanding demo sessions valid.
+const DEMO_USER_ID = "00000000-0000-0000-0000-0000000000de"
+
+const defineOwnedSeed = <TTable extends Table>(
+  table: TTable,
+  rows: Array<Omit<TTable["$inferInsert"], "userId">>
+) =>
+  defineSeed(
+    table,
+    rows.map((row) => ({ ...row, userId: DEMO_USER_ID })) as Array<TTable["$inferInsert"]>
+  )
 
 const today = new Date()
 const yesterday = new Date(today)
@@ -201,7 +217,15 @@ export const seedIds = {
 }
 
 export const seedEntries = [
-  defineSeed(foods, [
+  defineSeed(users, [
+    {
+      id: DEMO_USER_ID,
+      passwordHash: await hashPassword("demo"),
+      username: "demo"
+    }
+  ]),
+
+  defineOwnedSeed(foods, [
     {
       baseAmount: 130,
       calories: 132,
@@ -763,7 +787,7 @@ export const seedEntries = [
     }
   ]),
 
-  defineSeed(dayPlans, [
+  defineOwnedSeed(dayPlans, [
     {
       date: yesterdayDate,
       id: seedIds.dayPlans.yesterday,
@@ -781,7 +805,7 @@ export const seedEntries = [
     }
   ]),
 
-  defineSeed(dailyTargets, [
+  defineOwnedSeed(dailyTargets, [
     {
       calories: 2800,
       carbohydrates: 363,
@@ -808,7 +832,7 @@ export const seedEntries = [
     }
   ]),
 
-  defineSeed(
+  defineOwnedSeed(
     weightEntries,
     sampleWeightLogs.map(({ daysAgo, note, weight }) => ({
       date: daysAgoDate(daysAgo),
@@ -817,7 +841,7 @@ export const seedEntries = [
     }))
   ),
 
-  defineSeed(weightTargets, [
+  defineOwnedSeed(weightTargets, [
     {
       id: seedIds.weightTargets.main,
       maxTargetRate: 0.5,
@@ -828,7 +852,7 @@ export const seedEntries = [
     }
   ]),
 
-  defineSeed(dayPlanItems, [
+  defineOwnedSeed(dayPlanItems, [
     {
       amount: 60,
       consumedAmount: 60,

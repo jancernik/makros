@@ -16,7 +16,14 @@ export const foodFormSchema = createInsertSchema(foods, {
     .optional()
     .transform((value) => (value === "" ? undefined : value)),
   protein: z.coerce.number().min(0, "Protein must be 0 or more")
-}).omit({ createdAt: true, hidden: true, id: true, position: true, updatedAt: true })
+}).omit({
+  createdAt: true,
+  hidden: true,
+  id: true,
+  position: true,
+  updatedAt: true,
+  userId: true
+})
 
 export type FoodFormInput = z.infer<typeof foodFormSchema>
 

@@ -1,7 +1,6 @@
-import { getTableName, is, sql, Table } from "drizzle-orm"
+import { getTableName, sql, Table } from "drizzle-orm"
 
 import { db } from "../index"
-import * as schema from "../schema"
 import { seedEntries } from "./data"
 
 export type SeedEntry<TTable extends Table = Table> = {
@@ -32,13 +31,4 @@ export async function seedDatabase() {
     await db.insert(entry.table as never).values(entry.rows as never)
     console.log(`  ✓ ${tableName}: seeded ${entry.rows.length} rows`)
   }
-}
-
-export async function truncateAllTables() {
-  const tables = (Object.values(schema) as unknown[]).filter((v): v is Table => is(v, Table))
-
-  if (tables.length === 0) return
-
-  const tableNames = tables.map((t) => `"${getTableName(t)}"`).join(", ")
-  await db.execute(sql.raw(`TRUNCATE TABLE ${tableNames} RESTART IDENTITY CASCADE`))
 }
