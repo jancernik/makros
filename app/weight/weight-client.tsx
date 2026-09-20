@@ -164,30 +164,38 @@ export function WeightClient({ defaultLeftPct = 50, entries, targets }: WeightCl
     [allDatesInRange, entryByDate, basePointRadius]
   )
 
-  const trendDataset = useMemo(() => {
-    const fn = linearRegression(entries)
-    if (!fn || entries.length < 2) return null
-    const first = rangeStart
-    const last = todayStr
-    return {
-      backgroundColor: "transparent",
-      borderColor: "rgba(255,176,107,0.4)",
-      borderWidth: 1.5,
-      data: [
-        { x: first, y: fn(first) },
-        { x: last, y: fn(last) }
-      ],
-      fill: false as const,
-      label: "Trend",
-      pointHoverRadius: 0,
-      pointRadius: 0,
-      tension: 0
-    }
-  }, [entries, rangeStart, todayStr])
+  const trendDatasets = useMemo(
+    () =>
+      trendSpans(rangeStart, todayStr, targets).flatMap(([spanStart, spanEnd]) => {
+        const spanEntries = entries.filter((e) => e.date >= spanStart && e.date <= spanEnd)
+        const fn = linearRegression(spanEntries)
+        if (!fn) return []
+
+        const first = spanEntries[0].date
+        const last = spanEntries[spanEntries.length - 1].date
+        return [
+          {
+            backgroundColor: "transparent",
+            borderColor: "rgba(255,176,107,0.4)",
+            borderWidth: 1.5,
+            data: [
+              { x: first, y: fn(first) },
+              { x: last, y: fn(last) }
+            ],
+            fill: false as const,
+            label: "Trend",
+            pointHoverRadius: 0,
+            pointRadius: 0,
+            tension: 0
+          }
+        ]
+      }),
+    [entries, rangeStart, todayStr, targets]
+  )
 
   const datasets = useMemo(
-    () => [...targetDatasets, weightDataset, ...(trendDataset ? [trendDataset] : [])],
-    [targetDatasets, weightDataset, trendDataset]
+    () => [...targetDatasets, weightDataset, ...trendDatasets],
+    [targetDatasets, weightDataset, trendDatasets]
   )
 
   const chartData = useMemo(
@@ -378,6 +386,12 @@ export function WeightClient({ defaultLeftPct = 50, entries, targets }: WeightCl
       />
     </>
   )
+}
+
+function addDays(date: string, days: number): string {
+  const d = new Date(`${date}T12:00:00`)
+  d.setDate(d.getDate() + days)
+  return d.toISOString().split("T")[0]
 }
 
 function dailyDates(first: string, last: string): string[] {
@@ -600,6 +614,20 @@ function TargetsPanel({ targets }: { targets: WeightTarget[] }) {
       </div>
     </div>
   )
+}
+
+function trendSpans(first: string, last: string, targets: WeightTarget[]): [string, string][] {
+  const cuts = new Set<string>()
+  for (const t of targets) {
+    if (t.startDate && t.startDate > first && t.startDate <= last) cuts.add(t.startDate)
+    if (t.endDate && t.endDate >= first && t.endDate < last) cuts.add(addDays(t.endDate, 1))
+  }
+
+  const starts = [first, ...[...cuts].sort()]
+  return starts.map((start, i) => [
+    start,
+    i + 1 < starts.length ? addDays(starts[i + 1], -1) : last
+  ])
 }
 
 function yRange(values: (null | number | undefined)[]) {
