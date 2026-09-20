@@ -1,6 +1,6 @@
 "use client"
 
-import type { Column, Table } from "@tanstack/react-table"
+import type { Column, RowData, Table } from "@tanstack/react-table"
 import type { ReactNode } from "react"
 
 import { Columns2, Square, SquareCheckBig } from "lucide-react"
@@ -8,14 +8,16 @@ import { Columns2, Square, SquareCheckBig } from "lucide-react"
 import { Button } from "@/app/components/ui/button"
 import { Float, FloatContent, FloatItem, FloatTrigger } from "@/app/components/ui/float"
 
-type Props<TData> = {
+import type { TableFeatureSet } from "./table-features"
+
+type Props<TData extends RowData> = {
   buttonLabel?: ReactNode
   className?: string
-  getColumnLabel?: (column: Column<TData, unknown>) => string
-  table: Table<TData>
+  getColumnLabel?: (column: Column<TableFeatureSet, TData, unknown>) => string
+  table: Table<TableFeatureSet, TData>
 }
 
-export function ColumnsDropdown<TData>({
+export function ColumnsDropdown<TData extends RowData>({
   buttonLabel = "Columns",
   className,
   getColumnLabel,

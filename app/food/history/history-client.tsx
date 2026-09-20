@@ -205,8 +205,7 @@ function MacroChart({
       onClick: (_: unknown, elements: { index: number }[]) => {
         if (!elements.length) return
         const point = chartRef.current?.data.datasets[0]?.data[elements[0].index] as
-          | undefined
-          | { x?: string }
+          undefined | { x?: string }
         if (point?.x) router.push(`/food?date=${point.x}`)
       },
       plugins: {

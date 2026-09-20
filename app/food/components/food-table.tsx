@@ -16,13 +16,7 @@ import {
   SortableContext,
   verticalListSortingStrategy
 } from "@dnd-kit/sortable"
-import {
-  type ColumnDef,
-  getCoreRowModel,
-  getFilteredRowModel,
-  type SortingState,
-  useReactTable
-} from "@tanstack/react-table"
+import { type ColumnDef, type SortingState, useTable } from "@tanstack/react-table"
 import { CircleCheck, Eye, EyeOff, Plus, SearchX, UtensilsCrossed } from "lucide-react"
 import { useEffect, useMemo, useRef, useState } from "react"
 
@@ -34,11 +28,11 @@ import { Toggle } from "../../components/ui/toggle"
 import { addFoodToPlan, reorderFoods } from "../actions"
 import { FoodActionsMenu } from "./food-actions-menu"
 import { type PlanItem, usePlan } from "./plan-provider"
+import { tableFeatureSet } from "./table-features"
 import {
   applyTableSortingChange,
   DraggableHeader,
   formatNumber,
-  fuzzyFilter,
   normalizeColumnOrder,
   Pct,
   SortableRow,
@@ -120,15 +114,13 @@ export function FoodsTable({
     Object.fromEntries(allFoods.map((f) => [f.id, Number(f.baseAmount)]))
   )
   const amountsRef = useRef(amounts)
+  // eslint-disable-next-line react-hooks/refs
   amountsRef.current = amounts
   const activeTypeRef = useRef<"column" | "row" | null>(null)
 
   if (allFoods !== prevAllFoods) {
     setPrevAllFoods(allFoods)
     setRowOrder(allFoods.map((f) => f.id))
-  }
-
-  useEffect(() => {
     setAmounts((prev) => {
       const additions: Record<string, number> = {}
       for (const f of allFoods) {
@@ -136,7 +128,7 @@ export function FoodsTable({
       }
       return Object.keys(additions).length > 0 ? { ...prev, ...additions } : prev
     })
-  }, [allFoods])
+  }
 
   useEffect(() => {
     const id = setTimeout(() => {
@@ -173,7 +165,7 @@ export function FoodsTable({
     return rowOrder.map((id) => foodMap.get(id)).filter((f): f is Food => f !== undefined)
   }, [visibleFoods, sorting, rowOrder, amounts])
 
-  const columns = useMemo<ColumnDef<Food>[]>(
+  const columns = useMemo<ColumnDef<typeof tableFeatureSet, Food>[]>(
     () => [
       {
         cell: () => null,
@@ -314,13 +306,10 @@ export function FoodsTable({
     setSorting((prev) => applyTableSortingChange(updaterOrValue, prev))
   }
 
-  const table = useReactTable({
-    autoResetPageIndex: false,
+  const table = useTable({
     columns,
     data: displayFoods,
-    filterFns: { fuzzy: fuzzyFilter },
-    getCoreRowModel: getCoreRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
+    features: tableFeatureSet,
     globalFilterFn: "fuzzy",
     isMultiSortEvent: (e) => (e as MouseEvent).shiftKey,
     manualSorting: true,

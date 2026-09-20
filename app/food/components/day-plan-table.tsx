@@ -16,13 +16,7 @@ import {
   SortableContext,
   verticalListSortingStrategy
 } from "@dnd-kit/sortable"
-import {
-  type ColumnDef,
-  getCoreRowModel,
-  getFilteredRowModel,
-  type SortingState,
-  useReactTable
-} from "@tanstack/react-table"
+import { type ColumnDef, type SortingState, useTable } from "@tanstack/react-table"
 import { CircleCheck, Eye, EyeOff, SearchX, UtensilsCrossed, X } from "lucide-react"
 import { useEffect, useMemo, useRef, useState } from "react"
 
@@ -34,11 +28,11 @@ import { removePlanItem, reorderPlanItems } from "../actions"
 import { FoodActionsMenu } from "./food-actions-menu"
 import { PlanAmountInputs } from "./plan-amount-inputs"
 import { type PlanItem, usePlan } from "./plan-provider"
+import { tableFeatureSet } from "./table-features"
 import {
   applyTableSortingChange,
   DraggableHeader,
   formatNumber,
-  fuzzyFilter,
   normalizeColumnOrder,
   Pct,
   SortableRow,
@@ -178,7 +172,7 @@ export function DayPlanTable({
     return [...ordered, ...unordered]
   }, [items, sorting, rowOrder, showConsumed])
 
-  const columns = useMemo<ColumnDef<PlanItem>[]>(
+  const columns = useMemo<ColumnDef<typeof tableFeatureSet, PlanItem>[]>(
     () => [
       {
         cell: () => null,
@@ -319,13 +313,10 @@ export function DayPlanTable({
     setSorting((prev) => applyTableSortingChange(updaterOrValue, prev))
   }
 
-  const table = useReactTable({
-    autoResetPageIndex: false,
+  const table = useTable({
     columns,
     data: displayItems,
-    filterFns: { fuzzy: fuzzyFilter },
-    getCoreRowModel: getCoreRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
+    features: tableFeatureSet,
     globalFilterFn: "fuzzy",
     isMultiSortEvent: (e) => (e as MouseEvent).shiftKey,
     manualSorting: true,

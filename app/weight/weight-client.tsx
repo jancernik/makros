@@ -238,8 +238,7 @@ export function WeightClient({ defaultLeftPct = 50, entries, targets }: WeightCl
         if (!elements.length) return
         const el = elements[0]
         const raw = chartRef.current?.data.datasets[el.datasetIndex]?.data[el.index] as
-          | undefined
-          | { x?: string }
+          undefined | { x?: string }
         if (raw?.x) setHighlightedDate(raw.x)
       },
       onHover: (event: { native?: Event | null }, elements: unknown[]) => {

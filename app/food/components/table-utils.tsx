@@ -8,13 +8,12 @@ import {
 } from "@dnd-kit/modifiers"
 import { horizontalListSortingStrategy, SortableContext, useSortable } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
-import { rankItem } from "@tanstack/match-sorter-utils"
 import {
   type Cell,
-  type FilterFn,
   flexRender,
   type Header,
   type Row,
+  type RowData,
   type SortingState,
   type Table
 } from "@tanstack/react-table"
@@ -35,22 +34,11 @@ import React, {
   useMemo
 } from "react"
 
+import type { TableFeatureSet } from "./table-features"
+
 import { Button } from "../../components/ui/button"
 import { Input } from "../../components/ui/input"
 import { ColumnsDropdown } from "./columns-dropdown"
-
-declare module "@tanstack/react-table" {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  interface ColumnMeta<TData, TValue> {
-    shrink?: boolean
-  }
-  interface FilterFns {
-    fuzzy: FilterFn<unknown>
-  }
-}
-
-export const fuzzyFilter: FilterFn<unknown> = (row, columnId, value) =>
-  rankItem(row.getValue(columnId), value).passed
 
 export function applyTableSortingChange(
   updaterOrValue: ((prev: SortingState) => SortingState) | SortingState,
@@ -65,11 +53,11 @@ export function applyTableSortingChange(
   return next
 }
 
-export function DraggableCell<T>({
+export function DraggableCell<T extends RowData>({
   cell,
   className
 }: {
-  cell: Cell<T, unknown>
+  cell: Cell<TableFeatureSet, T, unknown>
   className?: string
 }) {
   const { isDragging, setNodeRef, transform } = useSortable({
@@ -89,13 +77,13 @@ export function DraggableCell<T>({
   )
 }
 
-export function DraggableHeader<T>({
+export function DraggableHeader<T extends RowData>({
   fixedCols,
   header,
   isRatioPartner = false
 }: {
   fixedCols: Set<string>
-  header: Header<T, unknown>
+  header: Header<TableFeatureSet, T, unknown>
   isRatioPartner?: boolean
 }) {
   const { attributes, isDragging, listeners, setNodeRef, transform } = useSortable({
@@ -179,7 +167,7 @@ export function SortableRow<T extends { id: string }>({
   columnOrder: string[]
   dimmed?: boolean
   fixedCols?: Set<string>
-  row: Row<T>
+  row: Row<TableFeatureSet, T>
 }) {
   const { attributes, isDragging, listeners, setNodeRef, transform } = useSortable({
     data: { type: "row" },
@@ -262,7 +250,7 @@ export function sortTableRows<T>(
   })
 }
 
-export function TableToolbar<T>({
+export function TableToolbar<T extends RowData>({
   globalFilter,
   onClearSort,
   onGlobalFilterChange,
@@ -276,7 +264,7 @@ export function TableToolbar<T>({
   onGlobalFilterChange: (value: string) => void
   rightControls?: ReactNode
   showClearSort: boolean
-  table: Table<T>
+  table: Table<TableFeatureSet, T>
   title: string
 }) {
   return (
